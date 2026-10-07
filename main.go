@@ -1,0 +1,41 @@
+package main
+
+import (
+	"embed"
+
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
+)
+
+//go:embed all:frontend/dist
+var assets embed.FS
+
+func main() {
+	app := NewApp()
+
+	err := wails.Run(&options.App{
+		Title:     "Sukoshi",
+		Width:     900,
+		Height:    650,
+		Frameless: true,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		Bind: []interface{}{
+			app,
+		},
+		OnStartup: app.startup,
+		// Ventana translúcida: en Windows es lo único que permite ver a través
+		// (sin esto el fondo transparente se ve blanco). Trae blur fijo del SO.
+		Windows: &windows.Options{
+			WebviewIsTransparent: true,
+			WindowIsTranslucent:  true,
+		},
+	})
+
+	if err != nil {
+		println("Error:", err.Error())
+	}
+}

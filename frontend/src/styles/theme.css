@@ -1,0 +1,43 @@
+:root {
+  --bg: #111111;
+  --bg-rgb: 17 17 17;
+  --bg-alpha: 1;
+  /* Fijo para paneles flotantes (el blur del fondo lo pone el SO). */
+  --bg-blur: 12px;
+  --fg: #e5e5e5;
+  --gutter: #555555;
+  --caret: #e5e5e5;
+  --selection: #333333;
+  --scrollbar: #2b2b2b;
+  --scrollbar-hover: #3a3a3a;
+  --search-bg: #1b1b1b;
+  --accent: #d29922;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-size: 14px;
+  --line-height: 1.6;
+  color-scheme: dark;
+}
+
+/* Tema claro base: el sistema de temas queda listo para ampliar. */
+:root[data-theme="light"] {
+  --bg: #f4f4f4;
+  --bg-rgb: 244 244 244;
+  --fg: #1a1a1a;
+  --gutter: #6e6e6e;
+  --caret: #1a1a1a;
+  --selection: #d3d3d3;
+  --scrollbar: #c6c6c6;
+  --scrollbar-hover: #adadad;
+  --search-bg: #ffffff;
+  --accent: #8a5a00;
+  color-scheme: light;
+}
+
+/* Fuentes del sistema (sin descargas): base lista para ampliar. */
+:root[data-font="consolas"] {
+  --mono: Consolas, "Liberation Mono", monospace;
+}
+
+:root[data-font="cascadia"] {
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, monospace;
+}

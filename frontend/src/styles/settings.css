@@ -1,0 +1,139 @@
+/* Panel de configuración: oculto salvo botón engranaje / Ctrl+, . */
+#settings {
+  position: absolute;
+  top: 36px;
+  right: 8px;
+  width: 248px;
+  /* Sólido a propósito: la opacidad del fondo no debe afectarlo. */
+  background: var(--search-bg);
+  border: 0;
+  border-radius: 6px;
+  padding: 12px;
+  z-index: 20;
+  font-size: 12px;
+
+  & #set-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--fg);
+  }
+
+  & #set-close {
+    border: 0;
+    background: transparent;
+    color: var(--gutter);
+    font: inherit;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+
+  & #set-close:hover {
+    color: var(--fg);
+  }
+
+  & .set-row {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--gutter);
+
+    & span {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    & b {
+      color: var(--fg);
+      font-weight: normal;
+    }
+  }
+
+  & input[type="range"] {
+    width: 100%;
+    accent-color: var(--gutter);
+    appearance: none;
+    -webkit-appearance: none;
+    height: 18px;
+    background: transparent;
+    cursor: pointer;
+    --p: 100%;
+
+    /* Track grueso temático con relleno de progreso (gris de antes). */
+    &::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, var(--gutter) var(--p), var(--scrollbar) var(--p));
+    }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--fg);
+      margin-top: -3px;
+    }
+
+    &::-moz-range-track {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--scrollbar);
+    }
+
+    &::-moz-range-progress {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--gutter);
+    }
+
+    &::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--fg);
+    }
+  }
+
+  & select {
+    width: 100%;
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--gutter);
+    border-radius: 4px;
+    font: inherit;
+    padding: 3px 4px;
+
+    /* El desplegable nativo también en tema oscuro. */
+    & option {
+      background: var(--search-bg);
+      color: var(--fg);
+    }
+  }
+
+  & #set-reset {
+    width: 100%;
+    background: transparent;
+    color: var(--gutter);
+    border: 1px solid var(--gutter);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 12px;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  & #set-reset:hover {
+    color: var(--fg);
+  }
+}
+
+#tb-btns .tb-icon {
+  width: 40px !important;
+
+  & svg {
+    vertical-align: -2px;
+  }
+}

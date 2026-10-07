@@ -1,0 +1,323 @@
+html, body {
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--mono);
+  overflow: hidden;
+}
+
+#app {
+  width: 100dvw;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Opacidad configurable. El blur del fondo lo pone el SO (translúcido). */
+  background: rgb(var(--bg-rgb) / var(--bg-alpha));
+}
+
+/* Barra de título propia (ventana frameless): mismo fondo que la app. */
+#titlebar {
+  flex: 0 0 32px;
+  display: flex;
+  align-items: stretch;
+  background: transparent;
+  --wails-draggable: drag;
+  user-select: none;
+}
+
+#tb-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  font-size: 12px;
+  color: var(--gutter);
+}
+
+#tb-btns {
+  display: flex;
+
+  & button {
+    width: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    opacity: 0.6;
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: default;
+    --wails-draggable: no-drag;
+  }
+
+  & button:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  & #tb-close:hover {
+    background: #c42b1c;
+  }
+}
+
+#editor-wrap {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+#gutter, #editor {
+  font-family: var(--mono);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  padding-top: 4px;
+}
+
+#gutter {
+  flex: 0 0 auto;
+  /* Ancho reservado hasta 9999 líneas: pasar de 9→10 o 99→100 no mueve nada. */
+  min-width: calc(4ch + 24px);
+  padding-left: 12px;
+  padding-right: 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--gutter);
+  white-space: pre;
+  overflow: hidden;
+  user-select: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+#editor {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  color: var(--fg);
+  border: 0;
+  outline: 0;
+  resize: none;
+  white-space: pre;
+  overflow: auto;
+  caret-color: var(--caret);
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border-radius: 5px;
+    border: 2px solid var(--bg);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover);
+  }
+}
+
+#editor::selection {
+  background: var(--selection);
+}
+
+#editor:focus-visible {
+  outline: none;
+}
+
+/* Barra de comandos: oculta salvo Ctrl+K / Ctrl+F / Ctrl+H / Ctrl+G. */
+#cmd {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(480px, 84vw);
+  /* Sólido a propósito: la opacidad del fondo no debe afectarlo. */
+  background: var(--search-bg);
+  border: 1px solid var(--gutter);
+  border-radius: 6px;
+  padding: 8px;
+  z-index: 10;
+
+  & #cmd-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  & input {
+    background: transparent;
+    color: var(--fg);
+    border: 0;
+    outline: 0;
+    font: inherit;
+    width: 100%;
+  }
+
+  & #cmd-replace {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--scrollbar);
+  }
+
+  & #cmd-count {
+    font-size: 11px;
+    color: var(--gutter);
+    white-space: nowrap;
+  }
+
+  & ul {
+    list-style: none;
+    margin-top: 6px;
+    max-height: 32dvh;
+    overflow: auto;
+  }
+
+  & li {
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  & li.active {
+    background: var(--selection);
+  }
+}
+
+/* Toast transitorio (cambio de pestaña): aparece y se va solo. */
+#toast {
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--search-bg);
+  color: var(--fg);
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+
+  &.show {
+    animation: toast-fade 1.4s ease forwards;
+  }
+}
+
+@keyframes toast-fade {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+#status {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 8px 16px 10px;
+  font-size: 11px;
+  color: var(--gutter);
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+
+  & .spacer {
+    flex: 1;
+  }
+
+  & #st-file {
+    color: var(--fg);
+    opacity: 0.8;
+  }
+
+  & #st-tabs {
+    color: var(--accent);
+    margin-left: -8px;
+  }
+}
+
+/* Grid de pestañas estilo Alt+Tab (Ctrl+Shift+Tab). */
+#tabgrid {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+#tabgrid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  width: min(640px, 86vw);
+  max-height: 56dvh;
+  overflow: auto;
+  height: fit-content;
+
+  & .tabcard {
+    background: var(--search-bg);
+    color: var(--fg);
+    border: 0;
+    border-radius: 6px;
+    padding: 12px;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    min-height: 112px;
+
+    &:focus {
+      outline: none;
+    }
+
+    & strong {
+      font-weight: normal;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    & em {
+      font-style: normal;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    & span {
+      font-size: 11px;
+      color: var(--gutter);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: pre-line;
+    }
+  }
+
+  & .tabcard.active {
+    background: var(--selection);
+  }
+
+  & .tabcard.sel {
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
+  }
+}

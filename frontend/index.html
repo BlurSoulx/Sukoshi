@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sukoshi</title>
+  </head>
+  <body>
+    <div id="app">
+      <header id="titlebar">
+        <span id="tb-title">Sukoshi</span>
+        <div id="tb-btns">
+          <button id="tb-new" class="tb-icon" aria-label="Nuevo documento">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          </button>
+          <button id="tb-open" class="tb-icon" aria-label="Abrir archivo">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          </button>
+          <button id="tb-save" class="tb-icon" aria-label="Guardar">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          </button>
+          <button id="tb-settings" class="tb-icon" aria-label="Configuración">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </button>
+          <button id="tb-min" aria-label="Minimizar">—</button>
+          <button id="tb-max" aria-label="Maximizar">☐</button>
+          <button id="tb-close" aria-label="Cerrar">✕</button>
+        </div>
+      </header>
+      <main id="editor-wrap">
+        <div id="gutter" aria-hidden="true"></div>
+        <textarea
+          id="editor"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          wrap="off"
+          placeholder=""
+        ></textarea>
+      </main>
+      <div id="cmd" hidden>
+        <div id="cmd-row">
+          <input id="cmd-input" type="text" placeholder="" autocomplete="off" spellcheck="false" />
+          <span id="cmd-count"></span>
+        </div>
+        <input id="cmd-replace" type="text" placeholder="Reemplazar" autocomplete="off" spellcheck="false" hidden />
+        <ul id="cmd-list"></ul>
+      </div>
+      <div id="toast" hidden></div>
+      <div id="tabgrid" hidden>
+        <div id="tabgrid-cards"></div>
+      </div>
+      <aside id="settings" hidden>
+        <div id="set-head">
+          <span>Configuración</span>
+          <button id="set-close" aria-label="Cerrar">✕</button>
+        </div>
+        <label class="set-row">
+          <span>Opacidad del fondo <b id="set-alpha-val">100%</b></span>
+          <input id="set-alpha" type="range" min="10" max="100" step="1" value="100" />
+        </label>
+        <label class="set-row">
+          <span>Tema</span>
+          <select id="set-theme">
+            <option value="dark">Oscuro</option>
+            <option value="light">Claro</option>
+          </select>
+        </label>
+        <label class="set-row">
+          <span>Fuente</span>
+          <select id="set-font">
+            <option value="system">Sistema</option>
+            <option value="consolas">Consolas</option>
+            <option value="cascadia">Cascadia Mono</option>
+          </select>
+        </label>
+        <button id="set-reset">Restablecer</button>
+      </aside>
+      <footer id="status">
+        <span id="st-file">untitled.md</span>
+        <span id="st-tabs" hidden></span>
+        <span id="st-pos">Ln 1, Col 1</span>
+        <span class="spacer"></span>
+        <span id="st-stats"></span>
+        <span id="st-type"></span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
