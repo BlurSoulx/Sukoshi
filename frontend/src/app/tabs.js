@@ -1,6 +1,8 @@
-import { state, activeDoc, tabInfo, addDoc, removeDoc, setActive, setDirty } from './state.js'
+import { state, activeDoc, tabInfo, addDoc, removeDoc, setActive, setDirty, mruNextId } from './state.js'
+import { confirmModal } from './modal.js'
 
 let editor = null
+const closedStack = []
 
 export function setupTabs(ed) {
   editor = ed
@@ -43,16 +45,27 @@ export function openGrid(next = false) {
   wrap.innerHTML = ''
   const list = tabList()
   list.forEach((t, i) => {
+    const doc = state.docs[i]
+    const lines = doc.content.split('\n')
     const b = document.createElement('button')
     b.className = 'tabcard' + (t.active ? ' active sel' : '')
     b.dataset.id = t.id
-    const name = document.createElement('strong')
-    name.textContent = t.name
-    const idx = document.createElement('em')
-    idx.textContent = t.hint
+    const body = document.createElement('span')
+    body.className = 'tabcard-body'
+    const file = document.createElement('span')
+    file.className = 'tab-file'
+    file.textContent = `${doc.fileName}${doc.dirty ? ' ●' : ''}`
+    const title = document.createElement('span')
+    title.className = 'tab-title'
+    title.textContent = lines[0] || '—'
     const prev = document.createElement('span')
-    prev.textContent = state.docs[i].content.split('\n').slice(0, 3).join('\n').slice(0, 140) || '—'
-    b.append(name, idx, prev)
+    prev.className = 'tab-prev'
+    prev.textContent = lines.slice(1, 4).join('\n').slice(0, 140) || '—'
+    const idx = document.createElement('span')
+    idx.className = 'tab-idx'
+    idx.textContent = t.hint
+    body.append(file, title, prev, idx)
+    b.append(body)
     b.addEventListener('click', () => {
       closeGrid()
       switchTab(+b.dataset.id)
@@ -60,7 +73,14 @@ export function openGrid(next = false) {
     wrap.appendChild(b)
   })
   root.hidden = false
-  if (next && list.length > 1) moveGrid(1)
+  if (next && list.length > 1) {
+    const cards = [...wrap.querySelectorAll('button')]
+    const target = cards.find((c) => +c.dataset.id === mruNextId()) ?? cards[1]
+    cards.forEach((c) => c.classList.remove('sel'))
+    target.classList.add('sel')
+    target.focus()
+    return
+  }
   wrap.querySelector('button.sel')?.focus()
 }
 
@@ -79,9 +99,8 @@ function moveGrid(d) {
   cards[i].focus()
 }
 
-function toast() {
+export function toastDoc() {
   const { index, total } = tabInfo()
-  const d = activeDoc()
   const el = document.getElementById('toast')
   if (!el) return
   el.textContent = `${d.fileName}${d.dirty ? ' ●' : ''} · ${index}/${total}`
@@ -93,7 +112,7 @@ function toast() {
   toast._t = setTimeout(() => { el.hidden = true }, 1400)
 }
 
-function showDoc(d) {
+export function showDoc(d) {
   editor.setValue(d.content)
   editor.el.setSelectionRange(d.sel || 0, d.sel || 0)
   setDirty(d.dirty)
@@ -106,34 +125,59 @@ export function switchTab(id) {
   if (cur) cur.sel = editor.cursorOffset()
   setActive(id)
   showDoc(activeDoc())
-  toast()
+  toastDoc()
 }
 
-export function cycleTab(dir) {
+export function cycleTab() {
   if (state.docs.length < 2) return
-  const i = state.docs.findIndex((d) => d.id === state.activeId)
-  const next = state.docs[(i + dir + state.docs.length) % state.docs.length]
-  switchTab(next.id)
+  switchTab(mruNextId())
 }
 
 export function newTab() {
   const cur = activeDoc()
   if (cur) cur.sel = editor.cursorOffset()
   showDoc(addDoc())
-  toast()
+  toastDoc()
 }
 
-export function closeTab() {
+export async function closeTab(saveFn) {
   const d = activeDoc()
-  if (d.dirty && !confirm(`"${d.fileName}" tiene cambios sin guardar. ¿Cerrar pestaña?`)) {
-    return 'cancelled'
+  if (d.dirty) {
+    const choice = await confirmModal({
+      title: d.fileName,
+      message: 'Tienes cambios sin guardar.',
+      buttons: [
+        { label: 'Cancelar', value: 'cancel' },
+        { label: 'Descartar', value: 'discard' },
+        { label: 'Guardar', value: 'save', primary: true },
+      ],
+    })
+    if (choice !== 'save' && choice !== 'discard') return 'cancelled'
+    if (choice === 'save' && !(await saveFn())) return 'cancelled'
   }
-  const wasLast = state.docs.length === 1
-  if (wasLast) return 'quit'
+  if (state.docs.length === 1) return 'quit'
+  closedStack.push({ content: d.content, filePath: d.filePath, fileName: d.fileName, dirty: d.dirty, sel: d.sel || 0 })
+  if (closedStack.length > 20) closedStack.shift()
   removeDoc(d.id)
   showDoc(activeDoc())
-  toast()
+  toastDoc()
   return 'closed'
+}
+
+export function reopenTab() {
+  const s = closedStack.pop()
+  if (!s) return false
+  const cur = activeDoc()
+  if (cur) cur.sel = editor.cursorOffset()
+  const d = addDoc()
+  d.content = s.content
+  d.filePath = s.filePath
+  d.fileName = s.fileName
+  d.sel = s.sel
+  showDoc(d)
+  setDirty(s.dirty)
+  toastDoc()
+  return true
 }
 
 export function tabList() {

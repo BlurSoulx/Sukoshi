@@ -28,9 +28,12 @@
         </div>
       </header>
       <main id="editor-wrap">
-        <div id="gutter" aria-hidden="true"></div>
-        <textarea
+        <div id="gutter" class="gutter" aria-hidden="true"></div>
+        <div class="stage" id="stage">
+          <pre class="hl" id="hl" aria-hidden="true"></pre>
+          <textarea
           id="editor"
+          class="ed"
           spellcheck="false"
           autocomplete="off"
           autocorrect="off"
@@ -38,7 +41,45 @@
           wrap="off"
           placeholder=""
         ></textarea>
+        </div>
       </main>
+      <div id="play" hidden>
+        <div id="play-editors">
+          <section class="play-pane lang-html">
+            <header>HTML</header>
+            <div class="play-body">
+              <div class="gutter" id="play-gutter-html" aria-hidden="true"></div>
+              <div class="stage" id="play-stage-html">
+                <pre class="hl" id="play-hl-html" aria-hidden="true"></pre>
+                <textarea class="ed" id="play-ed-html" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" wrap="off"></textarea>
+              </div>
+            </div>
+          </section>
+          <div class="play-div" data-i="0"></div>
+          <section class="play-pane lang-css">
+            <header>CSS</header>
+            <div class="play-body">
+              <div class="gutter" id="play-gutter-css" aria-hidden="true"></div>
+              <div class="stage" id="play-stage-css">
+                <pre class="hl" id="play-hl-css" aria-hidden="true"></pre>
+                <textarea class="ed" id="play-ed-css" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" wrap="off"></textarea>
+              </div>
+            </div>
+          </section>
+          <div class="play-div" data-i="1"></div>
+          <section class="play-pane lang-js">
+            <header>JS</header>
+            <div class="play-body">
+              <div class="gutter" id="play-gutter-js" aria-hidden="true"></div>
+              <div class="stage" id="play-stage-js">
+                <pre class="hl" id="play-hl-js" aria-hidden="true"></pre>
+                <textarea class="ed" id="play-ed-js" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" wrap="off"></textarea>
+              </div>
+            </div>
+          </section>
+        </div>
+        <iframe id="play-preview" sandbox="allow-scripts" title="Vista previa"></iframe>
+      </div>
       <div id="cmd" hidden>
         <div id="cmd-row">
           <input id="cmd-input" type="text" placeholder="" autocomplete="off" spellcheck="false" />
@@ -51,6 +92,16 @@
       <div id="tabgrid" hidden>
         <div id="tabgrid-cards"></div>
       </div>
+      <div id="modal" hidden>
+        <div id="modal-box" tabindex="-1">
+          <div id="modal-top">
+            <div id="modal-title"></div>
+            <button id="modal-x" aria-label="Cerrar" hidden>✕</button>
+          </div>
+          <div id="modal-msg"></div>
+          <div id="modal-btns"></div>
+        </div>
+      </div>
       <aside id="settings" hidden>
         <div id="set-head">
           <span>Configuración</span>
@@ -61,11 +112,20 @@
           <input id="set-alpha" type="range" min="10" max="100" step="1" value="100" />
         </label>
         <label class="set-row">
+          <span>Tamaño de fuente <b id="set-fontsize-val">14px</b></span>
+          <input id="set-fontsize" type="range" min="10" max="24" step="1" value="14" />
+        </label>
+        <label class="set-row">
           <span>Tema</span>
           <select id="set-theme">
             <option value="dark">Oscuro</option>
             <option value="light">Claro</option>
+            <option value="auto">Auto (SO)</option>
           </select>
+        </label>
+        <label class="set-row set-check">
+          <span>Autoguardado (10s)</span>
+          <input id="set-autosave" type="checkbox" />
         </label>
         <label class="set-row">
           <span>Fuente</span>
@@ -78,7 +138,7 @@
         <button id="set-reset">Restablecer</button>
       </aside>
       <footer id="status">
-        <span id="st-file">untitled.md</span>
+        <span id="st-file">untitled.txt</span>
         <span id="st-tabs" hidden></span>
         <span id="st-pos">Ln 1, Col 1</span>
         <span class="spacer"></span>

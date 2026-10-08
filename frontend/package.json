@@ -10,5 +10,10 @@
   },
   "devDependencies": {
     "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "@speed-highlight/core": "^2.1.0",
+    "dompurify": "^3.4.16",
+    "marked": "^18.1.0"
   }
 }

@@ -2,6 +2,9 @@ import { createEditor } from './editor.js'
 import { initShortcuts } from './shortcuts.js'
 import { initFooter } from './footer.js'
 import { initSettings } from './settings.js'
+import { initSession } from './session.js'
+import { initWatch } from './watch.js'
+import { adoptFile } from './files.js'
 import { setDirty } from './state.js'
 
 export function initApp() {
@@ -9,23 +12,43 @@ export function initApp() {
   const gutter = document.getElementById('gutter')
   if (!textarea || !gutter) throw new Error('Falta #editor o #gutter')
 
-  const editor = createEditor(textarea, gutter)
-  editor.setValue('')
-  setDirty(false)
-
+  const editor = createEditor({
+    textarea,
+    gutter,
+    stage: document.getElementById('stage'),
+    pre: document.getElementById('hl'),
+    detect: true,
+  })
   initFooter(editor)
   const settings = initSettings()
   const files = initShortcuts(editor, settings)
+  const session = initSession(editor)
+  initWatch(editor)
 
-  document.getElementById('tb-new')?.addEventListener('click', () => files.newFile())
-  document.getElementById('tb-open')?.addEventListener('click', () => files.openFile())
-  document.getElementById('tb-save')?.addEventListener('click', () => files.saveFile())
+  // Arrastrar archivos a la ventana los abre (máx. 8, solo texto/markdown).
+  window.runtime?.OnFileDrop?.((x, y, paths) => {
+    files.openPaths(paths)
+  }, false)
+  window.addEventListener('dragover', (e) => e.preventDefault())
+  window.addEventListener('drop', async (e) => {
+    e.preventDefault()
+    if (window.go?.main?.App) return
+    for (const f of [...(e.dataTransfer?.files ?? [])].filter((x) => /\.(txt|md|markdown|html|css|js)$/i.test(x.name)).slice(0, 8)) {
+      adoptFile(editor, { content: await f.text(), filePath: '', fileName: f.name })
+    }
+  })
+
+  document.getElementById('tb-new')?.addEventListener('click', () => { if (!inPlay()) files.newFile() })
+  document.getElementById('tb-open')?.addEventListener('click', () => { if (!inPlay()) files.openFile() })
+  document.getElementById('tb-save')?.addEventListener('click', () => { if (!inPlay()) files.saveFile() })
 
   document.getElementById('tb-settings')?.addEventListener('click', () => {
     settings.toggle()
   })
 
   // Barra de título propia: arrastra la ventana, doble-click maximiza.
+  // En modo playground los botones de archivo no actúan (son del editor).
+  const inPlay = () => document.body.classList.contains('play')
   const bar = document.getElementById('titlebar')
   bar?.addEventListener('dblclick', (e) => {
     if (e.target.closest('button')) return
@@ -71,13 +94,24 @@ export function initApp() {
     }
   }
 
-  // Ctrl+rueda: zoom solo del editor (respeta DPI/zoom del SO).
+  // Ctrl+rueda: zoom del editor persistido en config (gutter incluido vía variable).
   textarea.addEventListener('wheel', (e) => {
     if (!e.ctrlKey) return
     e.preventDefault()
-    const size = parseFloat(getComputedStyle(textarea).fontSize) || 14
-    textarea.style.fontSize = `${Math.min(32, Math.max(10, size + (e.deltaY < 0 ? 1 : -1)))}px`
+    settings.changeFontSize(e.deltaY < 0 ? 1 : -1)
+    editor.refresh()
   }, { passive: false })
+  window.addEventListener('resize', () => editor.refresh())
 
-  editor.focus()
+  // Sesión anterior (si existe) o documento en blanco. Bloqueado hasta
+  // resolver para no pisar lo que el usuario escriba en esos ms.
+  textarea.disabled = true
+  session.restore().then((ok) => {
+    if (!ok) {
+      editor.setValue('')
+      setDirty(false)
+    }
+    textarea.disabled = false
+    editor.focus()
+  })
 }

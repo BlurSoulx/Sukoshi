@@ -31,8 +31,15 @@ export function initFooter(editor) {
     const t = v.trim()
     const words = t ? t.split(/\s+/).length : 0
     posEl.textContent = `Ln ${line}, Col ${off - lastNl}`
-    statsEl.textContent = `${words} palabras · ${v.length} caracteres · ${editor.lineCount()} líneas`
-    typeEl.textContent = getExt() === '.txt' ? 'Texto plano' : 'Markdown'
+    const [ss, se] = editor.selection()
+    statsEl.textContent = se > ss
+      ? `${se - ss} seleccionados`
+      : `${words} palabras · ${v.length} caracteres · ${editor.lineCount()} líneas`
+    typeEl.textContent =
+      getExt() === '.txt' ? 'Texto plano' :
+      getExt() === '.html' ? 'HTML' :
+      getExt() === '.css' ? 'CSS' :
+      getExt() === '.js' ? 'JavaScript' : 'Markdown'
     const { index, total } = tabInfo()
     tabsEl.hidden = total < 2
     tabsEl.textContent = `${index}/${total}`

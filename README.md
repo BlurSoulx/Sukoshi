@@ -12,6 +12,22 @@ Filosofía: **el editor es el producto. La interfaz prácticamente no existe.**
 - [x] Buscar (`Ctrl+F`), reemplazar (`Ctrl+H`), ir a línea (`Ctrl+G`) desde la barra — sin paneles flotantes
 - [x] Footer mínimo: archivo (+●), Ln/Col, palabras, caracteres, líneas, tipo (Markdown/Texto plano)
 - [x] Pestañas sin UI visible: `Ctrl+T` nueva, `Ctrl+W` cierra (sale si es la última), `Ctrl+Tab` cicla, `Ctrl+Shift+Tab` grid estilo Alt+Tab (click/flechas/Enter), `Ctrl+K → Pestañas…` salta por nombre; footer muestra `i/n` en acento junto al archivo y toast transitorio al cambiar; cursor y dirty por pestaña
+- [x] Edición: fuente persistida (slider + `Ctrl+rueda`), ajuste de línea (`Alt+Z`), duplicar (`Ctrl+D`), mover líneas (`Alt+↑/↓`), auto-pares, listas con `Enter`, trim + salto final al guardar
+- [x] Vista: modo zen (`F11`, oculta barra+footer, persiste), índice de encabezados (`Ctrl+K → Ir a encabezado…`), footer con info de selección
+- [x] Texto: MAYÚS/minúsculas, unir líneas (`Ctrl+J`), ordenar líneas, copiar ruta, formatear tablas Markdown, snippets (`fecha`/`hora`/`tabla`/`lorem` + `Tab`), clic en gutter selecciona línea (paleta)
+- [x] Pestañas MRU (`Ctrl+Tab` va a la última usada, grid pre-selecciona MRU) y reabrir cerrada (`Ctrl+Shift+T`)
+- [x] Config: tema Auto (SO), autoguardado 10s (off por defecto)
+- [x] Archivos: recientes (`Ctrl+K → Abrir reciente…`), drag&drop a la ventana, sesión restaurada al abrir, recarga ante cambios externos
+- [x] Vista previa Markdown (`Ctrl+Shift+V`, split bajo demanda con `marked` + `DOMPurify`, render por frame en tiempo real)
+- [x] Resaltado html/css/js (`@speed-highlight/core`, ~9 kB): overlay `pre` + textarea transparente, solo viewport, colores por tema
+- [x] Extensión inteligente: tabs nuevas arrancan `untitled.txt` y suben a `.md`/`.html` según lo escrito (solo untitled, con histéresis)
+- [x] Selección siempre legible (`color` en `::selection` sobre el overlay)
+- [x] Abrir/guardar `.html/.css/.js` (diálogos, drop, footer indica el tipo)
+- [x] Playground web (`Ctrl+K → Playground web`): HTML/CSS/JS a la izquierda con resaltado, preview en vivo sandboxed a la derecha; buffers persistidos, sin tocar las pestañas
+- [x] Playground: headers por tech (naranja/morado/amarillo), divisores arrastrables, colapso con doble clic (layout persistido), Enter entre llaves con indent
+- [x] Modal propio temático (Guardar/Descartar/Cancelar) en vez de `confirm()` del navegador; bloquea atajos mientras está abierto
+- [x] Chuleta de sintaxis (`Ctrl+K → Sintaxis Markdown…`): referencia rápida en modal ancho con header y X
+- [x] Paleta: últimos 5 comandos arriba (secciones Recientes/Comandos) e indicador acento en el ítem activo
 - [x] Scrollbars temáticas (WebKit + `scrollbar-color`) y gutter con ancho reservado hasta 9999 líneas
 - [x] Configuración (engranaje / `Ctrl+,` / paleta): opacidad del fondo, tema oscuro/claro, fuente del sistema; persiste en localStorage (blur de fondo fijo del SO)
 - [x] Apertura/guardado vía Wails Go + fallback navegador (para `pnpm dev` sin Wails)
@@ -76,18 +92,20 @@ Go (app.go)
 Filesystem + diálogos nativos
 ```
 
-- `main.go`: ventana nativa Wails (`Frameless: true`, 900×650), sirve `frontend/dist` embebido.
-- `app.go`: solo filesystem + diálogos (`OpenAndRead`, `WriteFile`, `SaveAs`). Sin lógica de editor.
-- `frontend/src/app/state.js`: contenido, ruta, nombre, dirty. Sin librerías de estado.
-- `frontend/src/app/editor.js`: `<textarea>` + gutter de 1 solo nodo de texto, `requestAnimationFrame` para scroll/gutter. Tab inserta 2 espacios. `toggleWrap` para markdown.
-- `frontend/src/app/files.js`: usa binding Wails si existe, si no fallback navegador (`<input type=file>` + descarga `Blob`).
-- `frontend/src/app/shortcuts.js`: Ctrl+N/O/S/Shift+S/W/F/H/B/I/Shift+X, buscador flotante (máx. 5000 matches).
-- `frontend/src/app/app.js`: cableado, drag-to-move (doble-click alterna maximizar), Ctrl+rueda ajusta tamaño de fuente.
-- `frontend/src/styles/`: `theme.css` (variables `--bg #111`, `--fg #e5e5e5`, `--gutter #555`), `editor.css`, `reset.css`. Sin frameworks.
+- `main.go`: ventana nativa Wails (`Frameless: true`, 900×650, translúcida), sirve `frontend/dist` embebido.
+- `app.go`: solo filesystem + diálogos (`OpenAndRead`, `WriteFile`, `SaveAs`, `ReadFile`, `Stat`). Sin lógica de editor.
+- `frontend/src/app/state.js`: multi-doc (`docs`, `activeId`, dirty/cursor por pestaña). Sin librerías de estado.
+- `frontend/src/app/editor.js`: `<textarea>` + gutter de 1 solo nodo, `requestAnimationFrame`. Tab = 2 espacios, pares, listas, duplicar/mover líneas, wrap conmutable.
+- `frontend/src/app/files.js`: binding Wails (fallback navegador), recientes, adoptar archivos (diálogo, drop, sesión).
+- `frontend/src/app/tabs.js`: new/close/cycle/grid/toast. `session.js`: restaura sesión. `watch.js`: recarga ante cambios externos.
+- `frontend/src/app/shortcuts.js` + `palette.js` (`Ctrl+K`): comandos, buscar/reemplazar, ir a línea, pestañas, recientes.
+- `frontend/src/app/preview.js`: Markdown bajo demanda (`marked` + `DOMPurify`, `Ctrl+Shift+V`).
+- `frontend/src/app/app.js`: cableado, drag-to-move, fix resize-maximizado, drop nativo en navegador.
+- `frontend/src/styles/`: `theme.css` (variables + temas/fuentes), `editor.css`, `settings.css`, `reset.css`. Sin frameworks.
 
 ## Dependencias
 
-Frontend: **solo `vite` (devDependency)**. Resultado `pnpm build`: ~6.6 kB JS + ~1.6 kB CSS.
+Frontend: `vite` (dev) + `marked` + `dompurify` (preview) + `@speed-highlight/core` (resaltado html/css/js, lazy). ~120 kB JS total.
 Go: `github.com/wailsapp/wails/v2`. Nada más. Sin analytics, sin CDN, sin fuentes remotas. Funciona offline.
 
 ## Estructura

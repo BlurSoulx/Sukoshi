@@ -5,6 +5,12 @@ html, body {
   overflow: hidden;
 }
 
+/* Modo zen: solo el editor. */
+body.zen #titlebar,
+body.zen #status {
+  display: none;
+}
+
 #app {
   width: 100dvw;
   height: 100dvh;
@@ -65,14 +71,14 @@ html, body {
   min-height: 0;
 }
 
-#gutter, #editor {
+.gutter, .ed, .hl {
   font-family: var(--mono);
   font-size: var(--font-size);
   line-height: var(--line-height);
   padding-top: 4px;
 }
 
-#gutter {
+.gutter {
   flex: 0 0 auto;
   /* Ancho reservado hasta 9999 líneas: pasar de 9→10 o 99→100 no mueve nada. */
   min-width: calc(4ch + 24px);
@@ -91,17 +97,24 @@ html, body {
   }
 }
 
-#editor {
-  flex: 1;
-  min-width: 0;
+.ed {
   background: transparent;
-  color: var(--fg);
   border: 0;
   outline: 0;
   resize: none;
   white-space: pre;
-  overflow: auto;
   caret-color: var(--caret);
+}
+
+/* Overlay de resaltado: .stage hace scroll; textarea y pre se apilan con
+   las mismas métricas. El textarea lleva el texto transparente (caret y
+   selección siguen nativos) y el pre pinta el color: resaltado en código,
+   texto plano en el resto. */
+.stage {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar) transparent;
 
@@ -124,24 +137,54 @@ html, body {
   }
 }
 
-#editor::selection {
-  background: var(--selection);
+.stage .ed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  flex: none;
+  color: transparent;
+  overflow: hidden;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-#editor:focus-visible {
+.hl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--fg);
+}
+
+.ed::selection {
+  background: var(--selection);
+  color: var(--fg);
+}
+
+.ed:focus-visible {
   outline: none;
 }
 
 /* Barra de comandos: oculta salvo Ctrl+K / Ctrl+F / Ctrl+H / Ctrl+G. */
 #cmd {
   position: absolute;
-  top: 20px;
+  top: 48px;
   left: 50%;
   transform: translateX(-50%);
   width: min(480px, 84vw);
   /* Sólido a propósito: la opacidad del fondo no debe afectarlo. */
   background: var(--search-bg);
-  border: 1px solid var(--gutter);
+  border: 0;
   border-radius: 6px;
   padding: 8px;
   z-index: 10;
@@ -178,6 +221,27 @@ html, body {
     margin-top: 6px;
     max-height: 32dvh;
     overflow: auto;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar) transparent;
+
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--scrollbar);
+      border-radius: 5px;
+      border: 2px solid var(--search-bg);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-hover);
+    }
   }
 
   & li {
@@ -185,10 +249,32 @@ html, body {
     border-radius: 4px;
     font-size: 13px;
     cursor: pointer;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  & li .keys {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--gutter);
+    white-space: nowrap;
+  }
+
+  & li.head {
+    font-size: 11px;
+    color: var(--gutter);
+    cursor: default;
+    padding-top: 8px;
+  }
+
+  & li.head:first-child {
+    padding-top: 0;
   }
 
   & li.active {
     background: var(--selection);
+    color: var(--accent);
   }
 }
 
@@ -267,6 +353,27 @@ html, body {
   max-height: 56dvh;
   overflow: auto;
   height: fit-content;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border-radius: 5px;
+    border: 2px solid var(--bg);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover);
+  }
 
   & .tabcard {
     background: var(--search-bg);
@@ -281,43 +388,331 @@ html, body {
     flex-direction: column;
     gap: 5px;
     min-width: 0;
-    min-height: 112px;
+    min-height: 120px;
 
     &:focus {
       outline: none;
     }
 
-    & strong {
-      font-weight: normal;
-      font-size: 13px;
+    & .tabcard-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    & .tab-file {
+      font-size: 11px;
+      color: var(--gutter);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    & em {
-      font-style: normal;
-      font-size: 11px;
-      color: var(--accent);
+    & .tab-title {
+      font-size: 14px;
+      color: var(--fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    & span {
+    & .tab-prev {
       font-size: 11px;
       color: var(--gutter);
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       white-space: pre-line;
     }
+
+    & .tab-idx {
+      font-size: 11px;
+      color: var(--accent);
+      margin-top: auto;
+    }
   }
 
   & .tabcard.active {
-    background: var(--selection);
+    background: var(--accent);
+
+    & .tab-file,
+    & .tab-prev {
+      color: var(--on-accent);
+      opacity: 0.7;
+    }
+
+    & .tab-title,
+    & .tab-idx {
+      color: var(--on-accent);
+    }
+  }
+
+  & .tabcard.active.sel {
+    outline-color: var(--fg);
   }
 
   & .tabcard.sel {
     outline: 1px solid var(--accent);
     outline-offset: -1px;
+  }
+}
+
+/* Modal propio (reemplaza confirm() nativo): centrado, temático. */
+#modal {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+#modal-box {
+  width: min(360px, 84vw);
+  background: var(--search-bg);
+  border-radius: 8px;
+  padding: 16px;
+  outline: none;
+
+  &.wide {
+    width: min(560px, 90vw);
+  }
+
+  & #modal-title {
+    color: var(--fg);
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  & #modal-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  & #modal-x {
+    border: 0;
+    background: transparent;
+    color: var(--gutter);
+    font: inherit;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+
+  & #modal-x:hover {
+    color: var(--fg);
+  }
+
+  & #modal-msg {
+    color: var(--gutter);
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  & #modal-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    & button {
+      background: transparent;
+      color: var(--fg);
+      border: 1px solid var(--gutter);
+      border-radius: 4px;
+      font: inherit;
+      font-size: 12px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+
+    & button.primary {
+      background: var(--accent);
+      border-color: transparent;
+      color: var(--on-accent);
+    }
+  }
+}
+
+/* Chuleta de sintaxis dentro del modal. */
+#modal-doc {
+  max-height: 58dvh;
+  overflow: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border-radius: 5px;
+    border: 2px solid var(--search-bg);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover);
+  }
+}
+
+.md-cheatsheet {
+  & h4 {
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: normal;
+    margin: 0;
+    padding: 4px 0;
+  }
+
+  & h4:not(:first-child) {
+    border-top: 1px solid var(--scrollbar);
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+
+  & .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 4px 0;
+  }
+
+  & code {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    white-space: pre;
+  }
+
+  & span {
+    color: var(--gutter);
+    font-size: 11px;
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+/* Preview Markdown bajo demanda: split solo cuando se abre. */
+#editor-wrap.split #preview {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 4px 16px 32px;
+  border-left: 1px solid var(--scrollbar);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border-radius: 5px;
+    border: 2px solid var(--bg);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover);
+  }
+}
+
+/* Tipografía mínima del preview, con las variables del tema. */
+#preview {
+  & h1, & h2, & h3, & h4, & h5, & h6 {
+    margin: 0.8em 0 0.4em;
+    line-height: 1.3;
+  }
+
+  & h1 { font-size: 1.7em; }
+  & h2 { font-size: 1.45em; }
+  & h3 { font-size: 1.25em; }
+  & h4 { font-size: 1.1em; }
+  & h5, & h6 { font-size: 1em; }
+
+  & p, & ul, & ol {
+    margin: 0.5em 0;
+  }
+
+  & ul, & ol {
+    padding-left: 1.5em;
+  }
+
+  & li:has(> input[type="checkbox"]) {
+    list-style: none;
+  }
+
+  & blockquote {
+    margin: 0.5em 0;
+    padding-left: 0.8em;
+    border-left: 2px solid var(--accent);
+    color: var(--gutter);
+  }
+
+  & code {
+    background: var(--selection);
+    border-radius: 3px;
+    padding: 0 0.3em;
+  }
+
+  & pre {
+    background: var(--selection);
+    border-radius: 4px;
+    padding: 8px 10px;
+    overflow: auto;
+  }
+
+  & pre code {
+    background: transparent;
+    padding: 0;
+  }
+
+  & a {
+    color: var(--accent);
+  }
+
+  & img {
+    max-width: 100%;
+  }
+
+  & hr {
+    border: 0;
+    border-top: 1px solid var(--scrollbar);
+    margin: 1em 0;
+  }
+
+  & table {
+    border-collapse: collapse;
+    margin: 0.5em 0;
+  }
+
+  & th, & td {
+    border: 1px solid var(--scrollbar);
+    padding: 3px 8px;
   }
 }

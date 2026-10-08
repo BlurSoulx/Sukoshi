@@ -50,6 +50,22 @@
     }
   }
 
+  & .set-check {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    & span {
+      margin-bottom: 0;
+    }
+
+    & input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--gutter);
+    }
+  }
+
   & input[type="range"] {
     width: 100%;
     accent-color: var(--gutter);
