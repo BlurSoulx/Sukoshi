@@ -70,6 +70,24 @@ export function initPalette(getEd, actions) {
     else renderList()
   })
 
+  // Buscar: insensible a mayúsculas por defecto, con toggle Aa persistido.
+  let matchCase = false
+  try { matchCase = localStorage.getItem('sukoshi-find-case') === '1' } catch { /* sin storage */ }
+  const caseBtn = document.getElementById('cmd-case')
+  const prevBtn = document.getElementById('cmd-prev')
+  const nextBtn = document.getElementById('cmd-next')
+  const paintCase = () => caseBtn?.classList.toggle('on', matchCase)
+  paintCase()
+  caseBtn?.addEventListener('click', () => {
+    matchCase = !matchCase
+    try { localStorage.setItem('sukoshi-find-case', matchCase ? '1' : '0') } catch { /* sin storage */ }
+    paintCase()
+    if (mode === 'find' || mode === 'replace') runFind()
+    input.focus()
+  })
+  prevBtn?.addEventListener('click', () => { step(-1); input.focus() })
+  nextBtn?.addEventListener('click', () => { step(1); input.focus() })
+
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { e.preventDefault(); close() }
     else if ((mode === 'commands' || mode === 'tabs' || mode === 'recent' || mode === 'headings' || mode === 'playtpl' || mode === 'all') && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
@@ -124,6 +142,11 @@ export function initPalette(getEd, actions) {
     else if (next === 'headings') { sel = 0; renderHeadings() }
     else if (next === 'recent') { sel = 0; renderRecent() }
     else if (next === 'find' || next === 'replace') runFind()
+    else ed().setFind('')
+    const inFind = next === 'find' || next === 'replace'
+    if (prevBtn) prevBtn.hidden = !inFind
+    if (nextBtn) nextBtn.hidden = !inFind
+    if (caseBtn) caseBtn.hidden = !inFind
     input.focus()
     input.select()
   }
@@ -132,6 +155,7 @@ export function initPalette(getEd, actions) {
     root.hidden = true
     input.value = ''
     replace.value = ''
+    ed().setFind('')
     ed().focus()
   }
 
@@ -340,14 +364,17 @@ export function initPalette(getEd, actions) {
 
   function runFind() {
     const q = input.value
+    ed().setFind(q, matchCase)
     const v = ta().value
+    const hay = matchCase ? v : v.toLowerCase()
+    const nq = matchCase ? q : q.toLowerCase()
     matches = []
     index = 0
     if (!q) { count.textContent = ''; return }
-    let i = v.indexOf(q)
+    let i = hay.indexOf(nq)
     while (i >= 0 && matches.length < 5000) {
       matches.push(i)
-      i = v.indexOf(q, i + Math.max(1, q.length))
+      i = hay.indexOf(nq, i + Math.max(1, q.length))
     }
     if (matches.length) selectMatch(0)
     else count.textContent = '0/0'
@@ -359,6 +386,11 @@ export function initPalette(getEd, actions) {
     const t = ta()
     t.focus()
     t.setSelectionRange(pos, pos + input.value.length)
+    // La selección programática no desplaza: se centra el stage en el match.
+    const [line] = ed().lineCol(pos)
+    const lh = parseFloat(getComputedStyle(t).lineHeight) || 22
+    const sc = t.offsetParent ?? t
+    sc.scrollTop = Math.max(0, (line - 1) * lh - sc.clientHeight / 2)
     count.textContent = `${index + 1}/${matches.length}`
     input.focus()
   }
@@ -373,7 +405,10 @@ export function initPalette(getEd, actions) {
     const t = ta()
     const r = replace.value ?? ''
     if (all) {
-      t.setRangeText(t.value.split(q).join(r), 0, t.value.length, 'select')
+      const next = matchCase
+        ? t.value.split(q).join(r)
+        : t.value.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), () => r)
+      t.setRangeText(next, 0, t.value.length, 'select')
     } else if (matches.length) {
       const pos = matches[index]
       t.setRangeText(r, pos, pos + q.length, 'select')

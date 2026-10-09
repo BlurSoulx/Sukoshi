@@ -108,6 +108,13 @@
         <div id="cmd-row">
           <input id="cmd-input" type="text" placeholder="" autocomplete="off" spellcheck="false" />
           <span id="cmd-count"></span>
+          <button id="cmd-prev" class="cmd-nav" title="Anterior" data-i18n-title="find.prev" hidden>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+          </button>
+          <button id="cmd-next" class="cmd-nav" title="Siguiente" data-i18n-title="find.next" hidden>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <button id="cmd-case" class="cmd-nav cmd-aa" title="Distinguir mayúsculas" data-i18n-title="find.case" hidden>Aa</button>
         </div>
         <input id="cmd-replace" type="text" placeholder="Reemplazar" data-i18n-ph="cmd.replacePh" autocomplete="off" spellcheck="false" hidden />
         <ul id="cmd-list"></ul>

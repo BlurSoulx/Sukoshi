@@ -185,6 +185,12 @@ body.zen #status {
   color: var(--fg);
 }
 
+/* Coincidencias del buscar: el match actual lleva además la selección nativa. */
+.hl .find-mark {
+  background: color-mix(in srgb, var(--accent) 38%, transparent);
+  border-radius: 2px;
+}
+
 .ed:focus-visible {
   outline: none;
 }
@@ -234,6 +240,41 @@ body.zen #status {
     font-size: 11px;
     color: var(--gutter);
     white-space: nowrap;
+  }
+
+  & .cmd-nav {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--gutter);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+
+  & .cmd-nav:hover {
+    color: var(--fg);
+    background: var(--selection);
+  }
+
+  & .cmd-nav.on {
+    color: var(--accent);
+  }
+
+  & .cmd-nav:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  & .cmd-nav[hidden] {
+    display: none;
   }
 
   & ul {

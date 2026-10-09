@@ -64,6 +64,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       lastKey = ''
       if (pre.textContent !== v) pre.textContent = v
       positionPre(0, 0)
+      if (findQuery) markFind()
       return
     }
     const lh = parseFloat(getComputedStyle(textarea).lineHeight) || 22
@@ -83,6 +84,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     } catch {
       if (id === renderId) pre.textContent = slice
     }
+    if (findQuery) markFind()
   }
 
   // Índice de inicios de línea: un solo escaneo por cambio sirve a gutter,
@@ -114,6 +116,54 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       lhAt = now
     }
     return lhCache
+  }
+
+  // Marcas del buscar (Ctrl+F): se pintan sobre el pre con spans, sin tocar
+  // el valor. clear+mark en cada cambio (el render reescribe el pre de cero).
+  let findQuery = ''
+  let findCase = false
+  const clearFind = () => {
+    const marks = pre.querySelectorAll('.find-mark')
+    if (!marks.length) return
+    for (const m of marks) m.replaceWith(m.textContent)
+    // Sin esto, escribir la query letra a letra deja el texto fragmentado
+    // por las marcas viejas y las queries largas no cruzan las costuras.
+    pre.normalize()
+  }
+  const markFind = () => {
+    clearFind()
+    const q = findQuery
+    if (!q) return
+    // Insensible a mayúsculas por defecto: se busca en minúsculas pero se
+    // recorta el texto original (mismos offsets en la práctica).
+    const nq = findCase ? q : q.toLowerCase()
+    // Tope de marcas: una query de 1 letra en un doc enorme no debe
+    // reventar el DOM (el contador i/n ya avisa del total).
+    let left = 1000
+    const walker = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT)
+    const nodes = []
+    while (walker.nextNode()) nodes.push(walker.currentNode)
+    for (const node of nodes) {
+      if (left <= 0) break
+      const text = node.nodeValue
+      const hay = findCase ? text : text.toLowerCase()
+      let pos = hay.indexOf(nq)
+      if (pos < 0 || !node.parentNode) continue
+      const frag = document.createDocumentFragment()
+      let idx = 0
+      while (pos >= 0 && left > 0) {
+        frag.append(text.slice(idx, pos))
+        const mark = document.createElement('span')
+        mark.className = 'find-mark'
+        mark.textContent = text.slice(pos, pos + q.length)
+        frag.append(mark)
+        left--
+        idx = pos + q.length
+        pos = hay.indexOf(nq, idx)
+      }
+      frag.append(text.slice(idx))
+      node.parentNode.replaceChild(frag, node)
+    }
   }
 
   const scheduleGutter = () => {
@@ -627,6 +677,12 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     undo,
     redo,
     formatTable,
+    // Query del buscar: repinta marcas al instante (sin re-resaltar).
+    setFind: (q, caseSensitive = false) => {
+      findQuery = q ?? ''
+      findCase = !!caseSensitive
+      markFind()
+    },
     toggleWrapLines: () => {
       wrap = !wrap
       try { localStorage.setItem('sukoshi-wrap', wrap ? '1' : '0') } catch { /* sin storage */ }
