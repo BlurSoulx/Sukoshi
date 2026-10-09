@@ -2,8 +2,6 @@
   --bg: #111111;
   --bg-rgb: 17 17 17;
   --bg-alpha: 1;
-  /* Fijo para paneles flotantes (el blur del fondo lo pone el SO). */
-  --bg-blur: 12px;
   --fg: #e5e5e5;
   --gutter: #555555;
   --caret: #e5e5e5;

@@ -28,6 +28,7 @@ function trapTab(e) {
 
 export function confirmModal({ title, message, buttons }) {
   return new Promise((resolve) => {
+    const prevFocus = document.activeElement
     const root = document.getElementById('modal')
     document.getElementById('modal-title').textContent = title
     document.getElementById('modal-msg').textContent = message
@@ -40,6 +41,7 @@ export function confirmModal({ title, message, buttons }) {
       root.hidden = true
       document.removeEventListener('keydown', onKey, true)
       root.removeEventListener('click', out)
+      if (prevFocus?.focus) prevFocus.focus()
       resolve(v)
     }
     const onKey = (e) => {
@@ -77,6 +79,7 @@ export function isModalOpen() {
 // Panel de lectura (ej. chuleta): HTML propio, un botón Cerrar.
 export function showInfo({ title, body, wide = false }) {
   return new Promise((resolve) => {
+    const prevFocus = document.activeElement
     const root = document.getElementById('modal')
     const box = document.getElementById('modal-box')
     document.getElementById('modal-title').textContent = title
@@ -98,6 +101,7 @@ export function showInfo({ title, body, wide = false }) {
       box.classList.remove('wide')
       document.removeEventListener('keydown', onKey, true)
       root.removeEventListener('click', out)
+      if (prevFocus?.focus) prevFocus.focus()
       resolve(v)
     }
     const onKey = (e) => {

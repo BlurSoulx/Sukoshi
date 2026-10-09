@@ -85,6 +85,37 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     }
   }
 
+  // Índice de inicios de línea: un solo escaneo por cambio sirve a gutter,
+  // línea actual y footer (antes cada uno recorría todo el texto).
+  let lineStarts = [0]
+  const rebuildLineStarts = (v) => {
+    const arr = [0]
+    for (let i = 0; i < v.length; i++) if (v[i] === '\n') arr.push(i + 1)
+    lineStarts = arr
+    lineCount = arr.length
+  }
+  const lineOf = (off) => {
+    let lo = 0
+    let hi = lineStarts.length - 1
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1
+      if (lineStarts[mid] <= off) lo = mid
+      else hi = mid - 1
+    }
+    return lo
+  }
+  // line-height cacheado: leerlo fuerza recálculo de estilos en cada cursor.
+  let lhCache = 0
+  let lhAt = 0
+  const lineHeight = () => {
+    const now = Date.now()
+    if (!lhCache || now - lhAt > 500) {
+      lhCache = parseFloat(getComputedStyle(textarea).lineHeight) || 22
+      lhAt = now
+    }
+    return lhCache
+  }
+
   const scheduleGutter = () => {
     if (raf) return
     raf = requestAnimationFrame(() => {
@@ -94,17 +125,10 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     })
   }
 
-  const countLines = () => {
-    const v = textarea.value
-    let n = 1
-    for (let i = 0; i < v.length; i++) if (v[i] === '\n') n++
-    return n
-  }
-
   // Solo reconstruye el gutter si cambia el nº de líneas.
   // Evita crear un nodo por línea en cada input cuando el doc es grande.
   const renderGutter = () => {
-    const n = countLines()
+    const n = lineStarts.length
     lineCount = n
     if (!gutter) return
     // Ancho reservado en CSS hasta 4 dígitos: solo crece a partir de 10k líneas.
@@ -134,20 +158,16 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       curEl.hidden = true
       return
     }
-    const lh = parseFloat(getComputedStyle(textarea).lineHeight) || 22
-    let line = 0
+    const lh = lineHeight()
     const off = textarea.selectionStart
-    const val = textarea.value
-    for (let i = 0; i < off; i++) if (val[i] === '\n') line++
+    const line = lineOf(off)
     curEl.hidden = false
     curEl.style.height = `${lh}px`
     curEl.style.transform = `translateY(${4 + line * lh}px)`
   }
-  textarea.addEventListener('keyup', paintCurline)
-  textarea.addEventListener('click', paintCurline)
-  textarea.addEventListener('select', paintCurline)
+  // Un solo pintado por movimiento: selectionchange cubre teclado, ratón y
+  // saltos programáticos (input ya pinta por contenido).
   document.addEventListener('sukoshi:curline', paintCurline)
-  // Saltos programáticos (ir a línea, consola→código) tampoco avisan.
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === textarea) paintCurline()
   })
@@ -188,6 +208,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     textarea.value = st.value
     textarea.setSelectionRange(Math.min(st.s, st.value.length), Math.min(st.e, st.value.length))
     commitValue(st.value)
+    rebuildLineStarts(st.value)
     renderGutter()
     autosize()
     scheduleRender()
@@ -231,6 +252,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
   }
 
   textarea.addEventListener('input', () => {
+    rebuildLineStarts(textarea.value)
     recordUndo()
     commitValue(textarea.value)
     scheduleGutter()
@@ -554,6 +576,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     // setRaw: pinta sin tocar estado (carga inicial del playground).
     setRaw: (v) => {
       textarea.value = v ?? ''
+      rebuildLineStarts(textarea.value)
       renderGutter()
       stage.scrollTop = 0
       syncScroll()
@@ -566,6 +589,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     setValue: (v) => {
       textarea.value = v ?? ''
       commitValue(textarea.value)
+      rebuildLineStarts(textarea.value)
       renderGutter()
       stage.scrollTop = 0
       syncScroll()
@@ -580,6 +604,12 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     lineCount: () => lineCount,
     cursorOffset: () => textarea.selectionStart,
     selection: () => [textarea.selectionStart, textarea.selectionEnd],
+    // [línea, columna] base 1 sin escanear (usa el índice cacheado).
+    lineCol: (off) => {
+      const o = Math.max(0, Math.min(off, textarea.value.length))
+      const li = lineOf(o)
+      return [li + 1, o - lineStarts[li] + 1]
+    },
     toggleWrap,
     refresh: () => {
       autosize()

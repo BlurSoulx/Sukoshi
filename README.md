@@ -41,6 +41,7 @@ Filosofía: **el editor es el producto. La interfaz prácticamente no existe.**
 - [x] Scrollbars temáticas (WebKit + `scrollbar-color`) y gutter con ancho reservado hasta 9999 líneas
 - [x] Configuración (engranaje / `Ctrl+,` / paleta): opacidad del fondo, tema Auto (SO), fuente del sistema, autoguardado 10s (off por defecto); todo persiste en localStorage
 - [x] 9 temas en un solo registro (`themes.js`, ~5 kB): Sukoshi Oscuro/Claro, Dracula, Nord, Tokyo Night, Catppuccin Mocha, Gruvbox, Monokai y SynthWave '84; cambio instantáneo sin recargas
+- [x] Rendimiento: índice de líneas cacheado (gutter/footer/línea actual en O(log n)), playground de arranque perezoso, highlight solo del viewport, preview acotado por frame
 - [x] Apertura/guardado vía Wails Go + fallback navegador (para `pnpm dev` sin Wails)
 - [x] Ventana frameless preparada (`#drag` con `--wails-draggable: drag`)
 - [x] Verificado `wails build` → `build/bin/Sukoshi.exe` (Wails v2.16.0, Go 1.27.1)

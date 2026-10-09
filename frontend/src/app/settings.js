@@ -130,6 +130,9 @@ export function initSettings() {
   let fontDD = null
   let langDD = null
   const buildDropdowns = () => {
+    themeDD?.destroy()
+    fontDD?.destroy()
+    langDD?.destroy()
     theme.innerHTML = ''
     font.innerHTML = ''
     const langEl = document.getElementById('set-lang')

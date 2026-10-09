@@ -431,8 +431,6 @@ function applyViewport() {
   const frame = document.getElementById('play-preview')
   if (!frame) return
   const w = VIEWPORTS[prefs.viewport]
-  const btn = document.getElementById('pb-viewport')
-  if (btn) btn.textContent = w ? `${w}` : '100%'
   if (!w) {
     frame.style.width = ''
     frame.style.margin = ''
@@ -509,7 +507,18 @@ function wirePreviewDiv() {
 }
 
 export function initPlay() {
-  loadBuffers()
+  return ensurePlay()
+}
+
+// El playground se inicializa al primer uso (3 editores + observers fuera
+// del arranque). Todo lo que lee panes ya tiene guardia `!panes`.
+let api = null
+export function ensurePlay() {
+  if (!api) api = bootPlay()
+  return api
+}
+
+function bootPlay() {
   loadPrefs()
   loadLayout()
   panes = {}

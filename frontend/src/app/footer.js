@@ -25,14 +25,10 @@ export function initFooter(editor) {
   function paint() {
     const v = editor.getValue()
     const off = Math.min(editor.cursorOffset(), v.length)
-    let line = 1
-    let lastNl = -1
-    for (let i = 0; i < off; i++) {
-      if (v[i] === '\n') { line++; lastNl = i }
-    }
+    const [line, col] = editor.lineCol(off)
     const trimmed = v.trim()
     const words = trimmed ? trimmed.split(/\s+/).length : 0
-    posEl.textContent = `Ln ${line}, Col ${off - lastNl}`
+    posEl.textContent = `Ln ${line}, Col ${col}`
     const [ss, se] = editor.selection()
     statsEl.textContent = se > ss
       ? `${se - ss} ${t('ft.sel')}`

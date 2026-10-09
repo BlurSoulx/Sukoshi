@@ -1,11 +1,14 @@
 // Dropdown propio y temático (el <select> nativo no admite radius,
 // flecha custom ni popup oscuro real). Botón + lista con teclado.
+// destroy() libera los listeners de document (reconstrucción por idioma).
 export function createDropdown(root, { value, options, onChange }) {
+  const abort = new AbortController()
+  const onDoc = abort.signal
   root.classList.add('dd')
   root.innerHTML =
-    '<button type="button" class="dd-btn"><span class="dd-label"></span>' +
+    '<button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-label"></span>' +
     '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>' +
-    '<ul class="dd-list" hidden></ul>'
+    '<ul class="dd-list" role="listbox" hidden></ul>'
   const btn = root.querySelector('.dd-btn')
   const label = root.querySelector('.dd-label')
   const list = root.querySelector('.dd-list')
@@ -14,6 +17,7 @@ export function createDropdown(root, { value, options, onChange }) {
 
   for (const o of options) {
     const li = document.createElement('li')
+    li.setAttribute('role', 'option')
     li.textContent = o.label
     li.dataset.value = o.value
     li.addEventListener('click', () => choose(o.value))
@@ -37,13 +41,14 @@ export function createDropdown(root, { value, options, onChange }) {
   })
   document.addEventListener('click', (e) => {
     if (!list.hidden && !e.target.closest?.('.dd')) close()
-  })
+  }, { signal: onDoc })
   document.addEventListener('keydown', (e) => {
     if (list.hidden) return
     if (e.key === 'Escape') {
       e.preventDefault()
       e.stopImmediatePropagation()
       close()
+      btn.focus()
     } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault()
       e.stopImmediatePropagation()
@@ -55,25 +60,29 @@ export function createDropdown(root, { value, options, onChange }) {
       e.stopImmediatePropagation()
       choose(list.children[sel]?.dataset.value)
     }
-  })
+  }, { signal: onDoc })
 
   set(value)
-  return { get: () => current, set }
+  return { get: () => current, set, destroy: () => abort.abort() }
 
   function open() {
     sel = Math.max(0, [...list.children].findIndex((li) => li.dataset.value === current))
     paint()
     list.hidden = false
+    btn.setAttribute('aria-expanded', 'true')
   }
 
   function close() {
     list.hidden = true
+    btn.setAttribute('aria-expanded', 'false')
   }
 
   function paint() {
     [...list.children].forEach((li, i) => {
       li.classList.toggle('active', i === sel)
       li.classList.toggle('picked', li.dataset.value === current)
+      if (li.dataset.value === current) li.setAttribute('aria-selected', 'true')
+      else li.removeAttribute('aria-selected')
     })
     list.children[sel]?.scrollIntoView({ block: 'nearest' })
   }

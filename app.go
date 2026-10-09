@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -83,6 +84,8 @@ func (a *App) PreviewExternal(html string) error {
 		return err
 	}
 	f.Close()
+	// El navegador necesita el archivo unos segundos; se limpia solo al minuto.
+	time.AfterFunc(time.Minute, func() { os.Remove(name) })
 	return exec.Command("rundll32", "url.dll,FileProtocolHandler", name).Start()
 }
 

@@ -201,11 +201,11 @@ body.zen #status {
   transform: translateX(-50%);
   width: min(480px, 84vw);
   /* Sólido a propósito: la opacidad del fondo no debe afectarlo. */
-  background: var(--search-bg);
+  background: var(--menu-bg);
   border: 0;
   border-radius: 6px;
   padding: 8px;
-  z-index: 10;
+  z-index: 45;
   font-size: 13px;
 
   & #cmd-row {

@@ -4,6 +4,7 @@ import { t } from './i18n.js'
 
 let editor = null
 const closedStack = []
+let toastTimer = 0
 
 export function setupTabs(ed) {
   editor = ed
@@ -115,8 +116,8 @@ export function toastDoc() {
   el.classList.remove('show')
   void el.offsetWidth
   el.classList.add('show')
-  clearTimeout(toast._t)
-  toast._t = setTimeout(() => { el.hidden = true }, 1400)
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { el.hidden = true }, 1400)
 }
 
 export function showDoc(d) {

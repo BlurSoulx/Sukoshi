@@ -8,13 +8,16 @@ import { noteSaved } from './watch.js'
 import { initPalette } from './palette.js'
 import { iconSVG } from './icons.js'
 import { initPreview } from './preview.js'
-import { initPlay, focusPane, cyclePanes, togglePlayWrap, playPrefs, togglePlayPause, cyclePlayViewport, togglePlaySolo, cyclePlayZoom, zoomPlayBy, resetPlayZoom, rerunPreview, playPaneEditor, playPaneLang } from './play.js'
+import { ensurePlay, focusPane, cyclePanes, togglePlayWrap, playPrefs, togglePlayPause, cyclePlayViewport, togglePlaySolo, cyclePlayZoom, zoomPlayBy, resetPlayZoom, rerunPreview, playPaneEditor, playPaneLang } from './play.js'
 import { setupTabs, newTab, closeTab, cycleTab, switchTab, tabList, pristineTab, openGrid, isGridOpen, reopenTab } from './tabs.js'
 
 export function initShortcuts(editor, settings = null) {
   setupTabs(editor)
   const preview = initPreview(editor)
-  const play = initPlay()
+  // Playground perezoso: se crea al abrirlo (o al exportar/plantilla).
+  let play = null
+  const getPlay = () => (play ??= ensurePlay())
+  const isPlayOpen = () => play?.isOpen() ?? false
   // Todo lo de edición opera sobre el pane enfocado si el playground está abierto.
   const focusedEd = () => playPaneEditor() ?? editor
   const actions = {
@@ -33,7 +36,7 @@ export function initShortcuts(editor, settings = null) {
     reopenTab: () => reopenTab(),
     toggleWrap: () => focusedEd().toggleWrapLines(),
     togglePreview: () => preview.toggle(),
-    togglePlay: () => play.toggle(),
+    togglePlay: () => getPlay().toggle(),
     toUpper: () => focusedEd().changeCase('upper'),
     toLower: () => focusedEd().changeCase('lower'),
     undo: () => focusedEd().undo(),
@@ -42,7 +45,6 @@ export function initShortcuts(editor, settings = null) {
     sortLines: () => focusedEd().sortLines(),
     toggleComment: () => focusedEd().toggleComment(),
     formatTable: () => focusedEd().formatTable(),
-    toggleComment: () => focusedEd().toggleComment(),
     copyPath: () => copyPath(),
     showSyntax: () => showInfo({ title: t('cheat.syntax'), body: getLang() === 'en' ? SYNTAX_HTML_EN : SYNTAX_HTML, wide: true }),
     showShortcuts: () => showInfo({ title: t('cheat.shortcuts'), body: getLang() === 'en' ? SHORTCUTS_HTML_EN : SHORTCUTS_HTML, wide: true }),
@@ -166,7 +168,7 @@ export function initShortcuts(editor, settings = null) {
       else if (e.key === 'F1') { e.preventDefault(); showInfo({ title: t('cheat.shortcuts'), body: getLang() === 'en' ? SHORTCUTS_HTML_EN : SHORTCUTS_HTML, wide: true }) }
       else if (e.altKey && e.key.toLowerCase() === 'z') {
         e.preventDefault()
-        if (play.isOpen()) togglePlayWrap()
+        if (isPlayOpen()) togglePlayWrap()
         else editor.toggleWrapLines()
       }
       else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
@@ -183,7 +185,7 @@ export function initShortcuts(editor, settings = null) {
     else if (key === 't' && !shift) { e.preventDefault(); newTab() }
     else if (key === 't' && shift) { e.preventDefault(); reopenTab() }
     // Tecla bajo Esc / izquierda del 1 (Backquote en cualquier idioma).
-    else if (e.code === 'Backquote') { e.preventDefault(); play.toggle() }
+    else if (e.code === 'Backquote') { e.preventDefault(); getPlay().toggle() }
     else if (key === 'o') { e.preventDefault(); await doOpen() }
     else if (key === 's' && !shift) { e.preventDefault(); await doSave() }
     else if (key === 's' && shift) { e.preventDefault(); await doSaveAs() }
@@ -193,11 +195,11 @@ export function initShortcuts(editor, settings = null) {
       if (shift) {
         if (!isGridOpen()) openGrid(true)
       }
-      else if (play.isOpen()) cyclePanes()
+      else if (isPlayOpen()) cyclePanes()
       else cycleTab()
     }
     else if ((key === '1' || key === '2' || key === '3') && !shift) {
-      if (play.isOpen()) {
+      if (isPlayOpen()) {
         e.preventDefault()
         focusPane(+key - 1)
       }
@@ -216,9 +218,9 @@ export function initShortcuts(editor, settings = null) {
     else if (key === 'v' && shift) { e.preventDefault(); preview.toggle() }
     else if (key === ',' ) { e.preventDefault(); settings?.toggle() }
     // Zoom del preview (la rueda no llega al iframe): solo en playground.
-    else if (play.isOpen() && (key === '+' || key === '=')) { e.preventDefault(); zoomPlayBy(1) }
-    else if (play.isOpen() && key === '-') { e.preventDefault(); zoomPlayBy(-1) }
-    else if (play.isOpen() && key === '0') { e.preventDefault(); resetPlayZoom() }
+    else if (isPlayOpen() && (key === '+' || key === '=')) { e.preventDefault(); zoomPlayBy(1) }
+    else if (isPlayOpen() && key === '-') { e.preventDefault(); zoomPlayBy(-1) }
+    else if (isPlayOpen() && key === '0') { e.preventDefault(); resetPlayZoom() }
   })
 
   function selectedWord() {
@@ -299,7 +301,8 @@ export function initShortcuts(editor, settings = null) {
     }
   }
 
-  async function doPlayTemplate(id) {    if (!buffersEmpty()) {
+  async function doPlayTemplate(id) {    ensurePlay()
+    if (!buffersEmpty()) {
       const c = await confirmModal({
         title: t('cf.tplTitle'),
         message: t('cf.tplMsg'),
@@ -314,7 +317,7 @@ export function initShortcuts(editor, settings = null) {
   }
 
   async function doSave() {
-    if (play.isOpen()) return doSavePane()
+    if (isPlayOpen()) return doSavePane()
     const d = activeDoc()
     const r = await saveFile(editor, d.filePath, d.fileName)
     if (!r) return
@@ -326,7 +329,7 @@ export function initShortcuts(editor, settings = null) {
   }
 
   async function doSaveAs() {
-    if (play.isOpen()) return doSavePane()
+    if (isPlayOpen()) return doSavePane()
     const r = await saveFileAs(editor, activeDoc().fileName)
     if (!r) return
     setFilePath(r.filePath || '')
@@ -388,6 +391,7 @@ export function initShortcuts(editor, settings = null) {
   }
 
   async function doPlayExportZip() {
+    ensurePlay()
     if (!window.go?.main?.App) return
     const b = getBuffers()
     try {
@@ -397,6 +401,7 @@ export function initShortcuts(editor, settings = null) {
 
   // Un solo .html con CSS/JS inline (se abre en cualquier navegador).
   async function doPlayExportSingle() {
+    ensurePlay()
     try {
       await saveExportFile('playground.html', buildSrcdoc())
     } catch { /* diálogo cancelado */ }
