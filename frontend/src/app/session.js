@@ -1,6 +1,6 @@
 import { state, activeDoc, onTabsChange, replaceDocs } from './state.js'
 import { openPath } from './files.js'
-import { showDoc, toastDoc } from './tabs.js'
+import { showDoc } from './tabs.js'
 
 const KEY = 'sukoshi-session-v1'
 const MAX_BYTES = 2_000_000
@@ -57,6 +57,5 @@ async function restore(editor) {
   if (!docs.length) return false
   replaceDocs(docs, snap.active || 0)
   showDoc(activeDoc())
-  toastDoc()
   return true
 }

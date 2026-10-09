@@ -3,6 +3,7 @@ import { openPath } from './files.js'
 import { toastDoc } from './tabs.js'
 import { confirmModal } from './modal.js'
 import { getSetting } from './settings.js'
+import { t } from './i18n.js'
 
 // Mtimes conocidos por ruta. Se siembra en el primer vistazo y tras cada guardado.
 const known = new Map()
@@ -65,10 +66,10 @@ export function initWatch(editor) {
         toastDoc()
       } else if ((await confirmModal({
         title: d.fileName,
-        message: 'Cambió en disco. ¿Recargar y perder tus cambios?',
+        message: t('cf.reloadMsg'),
         buttons: [
-          { label: 'Cancelar', value: 'cancel' },
-          { label: 'Recargar', value: 'reload', primary: true },
+          { label: t('cf.cancel'), value: 'cancel' },
+          { label: t('cf.reload'), value: 'reload', primary: true },
         ],
       })) === 'reload') {
         d.content = r.content

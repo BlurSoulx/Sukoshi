@@ -1,5 +1,31 @@
 // Confirmación propia con el estilo de la app (reemplaza confirm()).
 // Resuelve con el value del botón o null (Esc / clic fuera).
+// Tab/Shift+Tab ciclan dentro del modal (trampa de foco).
+function trapTab(e) {
+  if (e.key !== 'Tab') return false
+  const box = document.getElementById('modal-box')
+  const els = [...box.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter((el) => !el.hidden && !el.disabled && el.offsetParent !== null)
+  if (!els.length) {
+    e.preventDefault()
+    return true
+  }
+  const first = els[0]
+  const last = els[els.length - 1]
+  const cur = document.activeElement
+  if (e.shiftKey && (cur === first || !box.contains(cur))) {
+    e.preventDefault()
+    last.focus()
+    return true
+  }
+  if (!e.shiftKey && (cur === last || !box.contains(cur))) {
+    e.preventDefault()
+    first.focus()
+    return true
+  }
+  return false
+}
+
 export function confirmModal({ title, message, buttons }) {
   return new Promise((resolve) => {
     const root = document.getElementById('modal')
@@ -21,6 +47,8 @@ export function confirmModal({ title, message, buttons }) {
         e.preventDefault()
         e.stopPropagation()
         done(null)
+      } else if (trapTab(e)) {
+        e.stopPropagation()
       }
     }
     const out = (e) => {
@@ -77,6 +105,8 @@ export function showInfo({ title, body, wide = false }) {
         e.preventDefault()
         e.stopPropagation()
         done(null)
+      } else if (trapTab(e)) {
+        e.stopPropagation()
       }
     }
     const out = (e) => {

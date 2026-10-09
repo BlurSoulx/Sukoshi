@@ -1,8 +1,11 @@
 package main
 
 import (
+	"archive/zip"
 	"context"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -64,6 +67,54 @@ func (a *App) Stat(path string) int64 {
 		return -1
 	}
 	return fi.ModTime().UnixMilli()
+}
+
+// Abre el HTML del playground en el navegador externo.
+// No usa runtime.BrowserOpenURL porque Wails bloquea el esquema file://;
+// se abre con el handler del SO vía rundll32 (solo Windows).
+func (a *App) PreviewExternal(html string) error {
+	f, err := os.CreateTemp("", "sukoshi-play-*.html")
+	if err != nil {
+		return err
+	}
+	name := f.Name()
+	if _, err := io.WriteString(f, html); err != nil {
+		f.Close()
+		return err
+	}
+	f.Close()
+	return exec.Command("rundll32", "url.dll,FileProtocolHandler", name).Start()
+}
+
+// Exporta los 3 buffers del playground como .zip.
+func (a *App) ExportZip(html string, css string, js string) string {
+	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "Exportar playground",
+		DefaultFilename: "sukoshi-play.zip",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "ZIP", Pattern: "*.zip"},
+		},
+	})
+	if err != nil || path == "" {
+		return ""
+	}
+	f, err := os.Create(path)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+	w := zip.NewWriter(f)
+	defer w.Close()
+	for name, content := range map[string]string{"index.html": html, "style.css": css, "app.js": js} {
+		fw, err := w.Create(name)
+		if err != nil {
+			return ""
+		}
+		if _, err := io.WriteString(fw, content); err != nil {
+			return ""
+		}
+	}
+	return path
 }
 
 func (a *App) SaveAs(content string, suggestedName string) string {

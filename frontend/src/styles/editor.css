@@ -166,6 +166,20 @@ body.zen #status {
   color: var(--fg);
 }
 
+/* Barra de línea actual: detrás del texto, sigue el scroll del stage. */
+.curline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: color-mix(in srgb, var(--selection) 55%, transparent);
+  pointer-events: none;
+}
+
+.curline[hidden] {
+  display: none;
+}
+
 .ed::selection {
   background: var(--selection);
   color: var(--fg);
@@ -173,6 +187,10 @@ body.zen #status {
 
 .ed:focus-visible {
   outline: none;
+}
+
+.ed:disabled {
+  opacity: 0.5;
 }
 
 /* Barra de comandos: oculta salvo Ctrl+K / Ctrl+F / Ctrl+H / Ctrl+G. */
@@ -188,6 +206,7 @@ body.zen #status {
   border-radius: 6px;
   padding: 8px;
   z-index: 10;
+  font-size: 13px;
 
   & #cmd-row {
     display: flex;
@@ -202,6 +221,7 @@ body.zen #status {
     outline: 0;
     font: inherit;
     width: 100%;
+    padding: 4px 6px;
   }
 
   & #cmd-replace {
@@ -218,8 +238,8 @@ body.zen #status {
 
   & ul {
     list-style: none;
-    margin-top: 6px;
-    max-height: 32dvh;
+    margin-top: 10px;
+    max-height: 46dvh;
     overflow: auto;
     padding-right: 6px;
     scrollbar-width: thin;
@@ -254,11 +274,35 @@ body.zen #status {
     gap: 12px;
   }
 
+  & li .mic {
+    display: flex;
+    color: var(--gutter);
+    flex: 0 0 auto;
+  }
+
+  & li.active .mic {
+    color: var(--accent);
+  }
+
   & li .keys {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 3px;
     font-size: 11px;
     color: var(--gutter);
     white-space: nowrap;
+  }
+
+  & li .keys kbd {
+    font-family: inherit;
+    font-size: 11px;
+    color: var(--fg);
+    background: var(--selection);
+    border: 1px solid var(--scrollbar);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 5px;
   }
 
   & li.head {
@@ -278,31 +322,42 @@ body.zen #status {
   }
 }
 
-/* Toast transitorio (cambio de pestaña): aparece y se va solo. */
+/* Toast transitorio (cambio de pestaña): abajo a la derecha, sobre el footer. */
 #toast {
   position: absolute;
-  top: 44px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--search-bg);
+  right: 12px;
+  bottom: 44px;
+  background: var(--menu-bg);
   color: var(--fg);
   font-size: 12px;
-  padding: 5px 12px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
   z-index: 15;
   pointer-events: none;
   opacity: 0;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+
+  & b {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  & span {
+    opacity: 0.75;
+  }
 
   &.show {
-    animation: toast-fade 1.4s ease forwards;
+    animation: toast-fade 1.6s ease forwards;
   }
 }
 
 @keyframes toast-fade {
-  0% { opacity: 0; }
-  15% { opacity: 1; }
-  75% { opacity: 1; }
-  100% { opacity: 0; }
+  0% { opacity: 0; transform: translateY(4px); }
+  15% { opacity: 1; transform: translateY(0); }
+  75% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
 }
 #status {
   flex: 0 0 auto;
@@ -542,6 +597,13 @@ body.zen #status {
       background: var(--accent);
       border-color: transparent;
       color: var(--on-accent);
+    }
+
+    /* El foco programático (atajos) también con acento, no el negro nativo. */
+    & button:focus,
+    & button:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 1px;
     }
   }
 }

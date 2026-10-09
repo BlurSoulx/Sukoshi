@@ -1,5 +1,6 @@
 import { state, activeDoc, tabInfo, addDoc, removeDoc, setActive, setDirty, mruNextId } from './state.js'
 import { confirmModal } from './modal.js'
+import { t } from './i18n.js'
 
 let editor = null
 const closedStack = []
@@ -100,13 +101,19 @@ function moveGrid(d) {
 }
 
 export function toastDoc() {
+  const d = activeDoc()
   const { index, total } = tabInfo()
   const el = document.getElementById('toast')
   if (!el) return
-  el.textContent = `${d.fileName}${d.dirty ? ' ●' : ''} · ${index}/${total}`
+  el.innerHTML = ''
+  const name = document.createElement('b')
+  name.textContent = `${d.fileName}${d.dirty ? ' ●' : ''}`
+  const info = document.createElement('span')
+  info.textContent = `· ${index}/${total} · ${d.content.split('\n').length} ${t('ft.lines')}`
+  el.append(name, info)
   el.hidden = false
-  void el.offsetWidth
   el.classList.remove('show')
+  void el.offsetWidth
   el.classList.add('show')
   clearTimeout(toast._t)
   toast._t = setTimeout(() => { el.hidden = true }, 1400)
@@ -145,11 +152,11 @@ export async function closeTab(saveFn) {
   if (d.dirty) {
     const choice = await confirmModal({
       title: d.fileName,
-      message: 'Tienes cambios sin guardar.',
+      message: t('cf.unsaved'),
       buttons: [
-        { label: 'Cancelar', value: 'cancel' },
-        { label: 'Descartar', value: 'discard' },
-        { label: 'Guardar', value: 'save', primary: true },
+        { label: t('cf.cancel'), value: 'cancel' },
+        { label: t('cf.discard'), value: 'discard' },
+        { label: t('cf.save'), value: 'save', primary: true },
       ],
     })
     if (choice !== 'save' && choice !== 'discard') return 'cancelled'

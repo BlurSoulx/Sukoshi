@@ -57,6 +57,19 @@ export async function saveFileAs(editor, fileName) {
   return { filePath: '', fileName: fileName || activeDoc().fileName }
 }
 
+// Guarda contenido generado (exports): diálogo nativo o descarga.
+export async function saveExportFile(fileName, content) {
+  if (hasWails()) {
+    try {
+      return await window.go.main.App.SaveAs(content, fileName)
+    } catch {
+      return null
+    }
+  }
+  downloadFallback(fileName, content)
+  return ''
+}
+
 const RECENT_KEY = 'sukoshi-recent'
 const RECENT_MAX = 10
 

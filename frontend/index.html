@@ -10,23 +10,36 @@
       <header id="titlebar">
         <span id="tb-title">Sukoshi</span>
         <div id="tb-btns">
-          <button id="tb-new" class="tb-icon" aria-label="Nuevo documento">
+          <button id="tb-new" class="tb-icon" aria-label="Nuevo documento" data-i18n-aria="nav.new">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
           </button>
-          <button id="tb-open" class="tb-icon" aria-label="Abrir archivo">
+          <button id="tb-open" class="tb-icon" aria-label="Abrir archivo" data-i18n-aria="nav.open">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
           </button>
-          <button id="tb-save" class="tb-icon" aria-label="Guardar">
+          <button id="tb-save" class="tb-icon" aria-label="Guardar" data-i18n-aria="nav.save">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
           </button>
-          <button id="tb-settings" class="tb-icon" aria-label="Configuración">
+          <button id="tb-settings" class="tb-icon" aria-label="Configuración" data-i18n-aria="nav.settings">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           </button>
-          <button id="tb-min" aria-label="Minimizar">—</button>
-          <button id="tb-max" aria-label="Maximizar">☐</button>
-          <button id="tb-close" aria-label="Cerrar">✕</button>
+          <button id="tb-min" aria-label="Minimizar" data-i18n-aria="nav.min">—</button>
+          <button id="tb-max" aria-label="Maximizar" data-i18n-aria="nav.max">☐</button>
+          <button id="tb-close" aria-label="Cerrar" data-i18n-aria="nav.close">✕</button>
         </div>
       </header>
+      <div id="playbar" hidden>
+        <button id="pb-layout" class="pb-btn" title="Disposición" data-i18n-title="pb.layout">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+        </button>
+        <div id="pb-layout-pop" hidden></div>
+        <button id="pb-console" class="pb-btn" title="Consola" data-i18n-title="pb.console">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        </button>
+        <button id="pb-more" class="pb-btn" title="Más" data-i18n-title="pb.more">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg>
+        </button>
+        <div id="pb-menu" hidden></div>
+      </div>
       <main id="editor-wrap">
         <div id="gutter" class="gutter" aria-hidden="true"></div>
         <div class="stage" id="stage">
@@ -44,9 +57,10 @@
         </div>
       </main>
       <div id="play" hidden>
+        <div id="play-main">
         <div id="play-editors">
           <section class="play-pane lang-html">
-            <header>HTML</header>
+            <header>HTML<span class="play-err" id="play-err-html" hidden></span></header>
             <div class="play-body">
               <div class="gutter" id="play-gutter-html" aria-hidden="true"></div>
               <div class="stage" id="play-stage-html">
@@ -57,7 +71,7 @@
           </section>
           <div class="play-div" data-i="0"></div>
           <section class="play-pane lang-css">
-            <header>CSS</header>
+            <header>CSS<span class="play-err" id="play-err-css" hidden></span></header>
             <div class="play-body">
               <div class="gutter" id="play-gutter-css" aria-hidden="true"></div>
               <div class="stage" id="play-stage-css">
@@ -68,7 +82,7 @@
           </section>
           <div class="play-div" data-i="1"></div>
           <section class="play-pane lang-js">
-            <header>JS</header>
+            <header>JS<span class="play-err" id="play-err-js" hidden></span></header>
             <div class="play-body">
               <div class="gutter" id="play-gutter-js" aria-hidden="true"></div>
               <div class="stage" id="play-stage-js">
@@ -78,14 +92,24 @@
             </div>
           </section>
         </div>
+        <div class="play-div" id="play-div-main"></div>
         <iframe id="play-preview" sandbox="allow-scripts" title="Vista previa"></iframe>
+        </div>
+        <div id="play-console" hidden>
+          <div id="play-console-head">
+            <span data-i18n="console.title">Consola</span>
+            <button id="play-console-clear" data-i18n="console.clear">Limpiar</button>
+          </div>
+          <div id="play-console-log"></div>
+          <input id="play-console-entry" type="text" placeholder="› evaluar JS…" data-i18n-ph="console.evalPh" autocomplete="off" spellcheck="false" />
+        </div>
       </div>
       <div id="cmd" hidden>
         <div id="cmd-row">
           <input id="cmd-input" type="text" placeholder="" autocomplete="off" spellcheck="false" />
           <span id="cmd-count"></span>
         </div>
-        <input id="cmd-replace" type="text" placeholder="Reemplazar" autocomplete="off" spellcheck="false" hidden />
+        <input id="cmd-replace" type="text" placeholder="Reemplazar" data-i18n-ph="cmd.replacePh" autocomplete="off" spellcheck="false" hidden />
         <ul id="cmd-list"></ul>
       </div>
       <div id="toast" hidden></div>
@@ -96,7 +120,7 @@
         <div id="modal-box" tabindex="-1">
           <div id="modal-top">
             <div id="modal-title"></div>
-            <button id="modal-x" aria-label="Cerrar" hidden>✕</button>
+            <button id="modal-x" aria-label="Cerrar" data-i18n-aria="modal.close" hidden>✕</button>
           </div>
           <div id="modal-msg"></div>
           <div id="modal-btns"></div>
@@ -104,38 +128,63 @@
       </div>
       <aside id="settings" hidden>
         <div id="set-head">
-          <span>Configuración</span>
-          <button id="set-close" aria-label="Cerrar">✕</button>
+          <span data-i18n="set.title">Configuración</span>
+          <button id="set-close" aria-label="Cerrar" data-i18n-aria="modal.close">✕</button>
         </div>
-        <label class="set-row">
-          <span>Opacidad del fondo <b id="set-alpha-val">100%</b></span>
-          <input id="set-alpha" type="range" min="10" max="100" step="1" value="100" />
-        </label>
-        <label class="set-row">
-          <span>Tamaño de fuente <b id="set-fontsize-val">14px</b></span>
-          <input id="set-fontsize" type="range" min="10" max="24" step="1" value="14" />
-        </label>
-        <label class="set-row">
-          <span>Tema</span>
-          <select id="set-theme">
-            <option value="dark">Oscuro</option>
-            <option value="light">Claro</option>
-            <option value="auto">Auto (SO)</option>
-          </select>
-        </label>
-        <label class="set-row set-check">
-          <span>Autoguardado (10s)</span>
-          <input id="set-autosave" type="checkbox" />
-        </label>
-        <label class="set-row">
-          <span>Fuente</span>
-          <select id="set-font">
-            <option value="system">Sistema</option>
-            <option value="consolas">Consolas</option>
-            <option value="cascadia">Cascadia Mono</option>
-          </select>
-        </label>
-        <button id="set-reset">Restablecer</button>
+        <div class="set-group">
+          <div class="set-ghead">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+            <span data-i18n="set.appearance">Apariencia</span>
+          </div>
+          <label class="set-row">
+            <span><span data-i18n="set.opacity">Opacidad del fondo</span> <b id="set-alpha-val">100%</b></span>
+            <input id="set-alpha" type="range" min="10" max="100" step="1" value="100" />
+          </label>
+          <label class="set-row">
+            <span><span data-i18n="set.fontSize">Tamaño de fuente</span> <b id="set-fontsize-val">14px</b></span>
+            <input id="set-fontsize" type="range" min="10" max="24" step="1" value="14" />
+          </label>
+          <div class="set-row">
+            <span data-i18n="set.theme">Tema</span>
+            <div id="set-theme"></div>
+          </div>
+          <div class="set-row">
+            <span data-i18n="set.font">Fuente</span>
+            <div id="set-font"></div>
+          </div>
+          <div class="set-row set-accent">
+            <span data-i18n="set.accent">Color de acento</span>
+            <div class="set-accent-ctl">
+              <input id="set-accent" type="color" value="#d29922" />
+              <button id="set-accent-auto" title="Usar el del tema" data-i18n-title="set.accentAuto">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              </button>
+            </div>
+          </div>
+          <label class="set-row set-check">
+            <span data-i18n="set.curline">Resaltar línea actual</span>
+            <input id="set-curline" type="checkbox" checked />
+          </label>
+          <label class="set-row set-check">
+            <span data-i18n="set.themedPreview">Fondo del preview según tema</span>
+            <input id="set-themed-preview" type="checkbox" checked />
+          </label>
+        </div>
+        <div class="set-group">
+          <div class="set-ghead">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span data-i18n="set.general">General</span>
+          </div>
+          <label class="set-row set-check">
+            <span data-i18n="set.autosave">Autoguardado (10s)</span>
+            <input id="set-autosave" type="checkbox" />
+          </label>
+          <div class="set-row">
+            <span data-i18n="set.language">Idioma</span>
+            <div id="set-lang"></div>
+          </div>
+        </div>
+        <button id="set-reset" data-i18n="set.reset">Restablecer</button>
       </aside>
       <footer id="status">
         <span id="st-file">untitled.txt</span>

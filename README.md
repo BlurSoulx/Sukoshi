@@ -13,8 +13,8 @@ Filosofía: **el editor es el producto. La interfaz prácticamente no existe.**
 - [x] Footer mínimo: archivo (+●), Ln/Col, palabras, caracteres, líneas, tipo (Markdown/Texto plano)
 - [x] Pestañas sin UI visible: `Ctrl+T` nueva, `Ctrl+W` cierra (sale si es la última), `Ctrl+Tab` cicla, `Ctrl+Shift+Tab` grid estilo Alt+Tab (click/flechas/Enter), `Ctrl+K → Pestañas…` salta por nombre; footer muestra `i/n` en acento junto al archivo y toast transitorio al cambiar; cursor y dirty por pestaña
 - [x] Edición: fuente persistida (slider + `Ctrl+rueda`), ajuste de línea (`Alt+Z`), duplicar (`Ctrl+D`), mover líneas (`Alt+↑/↓`), auto-pares, listas con `Enter`, trim + salto final al guardar
-- [x] Vista: modo zen (`F11`, oculta barra+footer, persiste), índice de encabezados (`Ctrl+K → Ir a encabezado…`), footer con info de selección
-- [x] Texto: MAYÚS/minúsculas, unir líneas (`Ctrl+J`), ordenar líneas, copiar ruta, formatear tablas Markdown, snippets (`fecha`/`hora`/`tabla`/`lorem` + `Tab`), clic en gutter selecciona línea (paleta)
+- [x] Vista: modo zen (`F11`, oculta barra+footer, persiste), índice de encabezados (`Ctrl+K → Ir a encabezado…`), chuleta de atajos (`F1`), exportar Markdown a HTML, footer con info de selección
+- [x] Texto: MAYÚS/minúsculas, unir líneas (`Ctrl+J`), ordenar líneas, copiar ruta, formatear tablas Markdown, snippets (`fecha`/`hora`/`tabla`/`lorem` + `Tab`), clic en gutter selecciona línea, comentar línea (`Ctrl+.`) por lenguaje, deshacer/rehacer propio (`Ctrl+Z`, `Ctrl+Shift+Z`/`Ctrl+Y`, paleta)
 - [x] Pestañas MRU (`Ctrl+Tab` va a la última usada, grid pre-selecciona MRU) y reabrir cerrada (`Ctrl+Shift+T`)
 - [x] Config: tema Auto (SO), autoguardado 10s (off por defecto)
 - [x] Archivos: recientes (`Ctrl+K → Abrir reciente…`), drag&drop a la ventana, sesión restaurada al abrir, recarga ante cambios externos
@@ -24,12 +24,23 @@ Filosofía: **el editor es el producto. La interfaz prácticamente no existe.**
 - [x] Selección siempre legible (`color` en `::selection` sobre el overlay)
 - [x] Abrir/guardar `.html/.css/.js` (diálogos, drop, footer indica el tipo)
 - [x] Playground web (`Ctrl+K → Playground web`): HTML/CSS/JS a la izquierda con resaltado, preview en vivo sandboxed a la derecha; buffers persistidos, sin tocar las pestañas
-- [x] Playground: headers por tech (naranja/morado/amarillo), divisores arrastrables, colapso con doble clic (layout persistido), Enter entre llaves con indent
+- [x] Mini-Emmet vanilla (0 deps, solo playground): `.box`, `ul>li*3`, `+ ^ $ @ () [] {}` , `!`, `loremN`, tags implícitos, CSS (`m10`, `d:f`, `pos:a`…); 37 tests (`node emmet-test.mjs`)
+- [x] Playground: headers por tech (naranja/morado/amarillo), divisores arrastrables, colapso con doble clic (layout persistido), Enter entre llaves con indent, `Ctrl+1/2/3` y `Ctrl+Tab` entre panes
+- [x] Playground: layouts izq/der/arriba/abajo (selector en cruz + reset central), consola JS (logs+errores con punto de aviso, sin auto-apertura ni spam de repetidos), auto-cierre de tags HTML, playbar propia
+- [x] Playground: importar archivos con drop a su pane, validador HTML/CSS/JS (punto rojo junto a cada título), plantillas starter, viewports 100/768/390, pausa del vivo, fondo claro/oscuro, divisor del preview con mínimos
+- [x] Playground: playbar de 3 botones (layout en cruz con reset, consola, menú overflow), abrir en navegador vía handler del SO (Wails bloquea file://)
+- [x] Playground: preview con fondo de la paleta activa (violeta oscuro en SynthWave, etc.), en tiempo real al cambiar de tema; checkbox para fondo neutro
+- [x] Config: grupos Apariencia/General con iconos, dropdowns propios sin borde (tema oscuro, con radio y teclado)
+- [x] Config: acento personalizado (color picker + volver al del tema), resaltar línea actual (toggle), idioma Español/English (auto por defecto)
+- [x] Playground: atajos y paleta operan en el pane enfocado; `Ctrl+S` guarda el pane a disco
+- [x] Playground: consola REPL (evaluar JS en el contexto del preview), solo-preview, abrir en navegador externo, exportar .zip y .html único (inline), zoom del preview (`Ctrl+Plus/Minus/0`), ajuste de línea propio, snippets JS, wrap en panes
+- [x] Editor: guardar todo, cerrar otras pestañas, buscar en pestañas (`Ctrl+Shift+F`), errores JS con salto a línea
 - [x] Modal propio temático (Guardar/Descartar/Cancelar) en vez de `confirm()` del navegador; bloquea atajos mientras está abierto
 - [x] Chuleta de sintaxis (`Ctrl+K → Sintaxis Markdown…`): referencia rápida en modal ancho con header y X
 - [x] Paleta: últimos 5 comandos arriba (secciones Recientes/Comandos) e indicador acento en el ítem activo
 - [x] Scrollbars temáticas (WebKit + `scrollbar-color`) y gutter con ancho reservado hasta 9999 líneas
-- [x] Configuración (engranaje / `Ctrl+,` / paleta): opacidad del fondo, tema oscuro/claro, fuente del sistema; persiste en localStorage (blur de fondo fijo del SO)
+- [x] Configuración (engranaje / `Ctrl+,` / paleta): opacidad del fondo, tema Auto (SO), fuente del sistema, autoguardado 10s (off por defecto); todo persiste en localStorage
+- [x] 9 temas en un solo registro (`themes.js`, ~5 kB): Sukoshi Oscuro/Claro, Dracula, Nord, Tokyo Night, Catppuccin Mocha, Gruvbox, Monokai y SynthWave '84; cambio instantáneo sin recargas
 - [x] Apertura/guardado vía Wails Go + fallback navegador (para `pnpm dev` sin Wails)
 - [x] Ventana frameless preparada (`#drag` con `--wails-draggable: drag`)
 - [x] Verificado `wails build` → `build/bin/Sukoshi.exe` (Wails v2.16.0, Go 1.27.1)
@@ -93,7 +104,7 @@ Filesystem + diálogos nativos
 ```
 
 - `main.go`: ventana nativa Wails (`Frameless: true`, 900×650, translúcida), sirve `frontend/dist` embebido.
-- `app.go`: solo filesystem + diálogos (`OpenAndRead`, `WriteFile`, `SaveAs`, `ReadFile`, `Stat`). Sin lógica de editor.
+- `app.go`: solo filesystem + diálogos (`OpenAndRead`, `WriteFile`, `SaveAs`, `ReadFile`, `Stat`, `PreviewExternal`, `ExportZip`). Sin lógica de editor.
 - `frontend/src/app/state.js`: multi-doc (`docs`, `activeId`, dirty/cursor por pestaña). Sin librerías de estado.
 - `frontend/src/app/editor.js`: `<textarea>` + gutter de 1 solo nodo, `requestAnimationFrame`. Tab = 2 espacios, pares, listas, duplicar/mover líneas, wrap conmutable.
 - `frontend/src/app/files.js`: binding Wails (fallback navegador), recientes, adoptar archivos (diálogo, drop, sesión).

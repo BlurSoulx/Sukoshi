@@ -1,16 +1,18 @@
 import { activeDoc, setDirty, getExt } from './state.js'
 import { highlightHTML, setLoader } from '@speed-highlight/core'
+import { expandHTML, looksLikeHTML, VOID_TAGS } from './emmet-html.js'
+import { expandCSS, looksLikeCSS } from './emmet-css.js'
 
-// Solo estos 3 lenguajes (el resto ni se empaqueta).
+// Solo estos 3 lenguajes (el resto ni se empaqueta). CSS usa gramática propia.
 setLoader((n) => ({
   html: () => import('@speed-highlight/core/languages/html.js'),
-  css: () => import('@speed-highlight/core/languages/css.js'),
+  css: () => import('./shj-css.js'),
   js: () => import('@speed-highlight/core/languages/js.js'),
 })[n]?.())
 
 const LANGS = { '.html': 'html', '.css': 'css', '.js': 'js' }
 
-export function createEditor({ textarea, gutter = null, stage, pre, getLang = null, commit = null, detect = false }) {
+export function createEditor({ textarea, gutter = null, stage, pre, getLang = null, commit = null, detect = false, emmet = null, showCurline = null }) {
   // Por defecto: lenguaje por extensión del doc activo y commit al estado.
   // Los panes del playground pasan su propio getLang/commit.
   const langOf = getLang ?? (() => LANGS[getExt()] ?? null)
@@ -120,17 +122,132 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     if (gutter) gutter.scrollTop = stage.scrollTop
   }
 
+  // Barra de línea actual: vive en coords de contenido (el stage la desplaza
+  // solo). Con ajuste de línea se oculta (las líneas lógicas no coinciden).
+  const curEl = document.createElement('div')
+  curEl.className = 'curline'
+  curEl.setAttribute('aria-hidden', 'true')
+  curEl.hidden = true
+  stage.prepend(curEl)
+  const paintCurline = () => {
+    if ((showCurline?.() ?? true) === false || wrap) {
+      curEl.hidden = true
+      return
+    }
+    const lh = parseFloat(getComputedStyle(textarea).lineHeight) || 22
+    let line = 0
+    const off = textarea.selectionStart
+    const val = textarea.value
+    for (let i = 0; i < off; i++) if (val[i] === '\n') line++
+    curEl.hidden = false
+    curEl.style.height = `${lh}px`
+    curEl.style.transform = `translateY(${4 + line * lh}px)`
+  }
+  textarea.addEventListener('keyup', paintCurline)
+  textarea.addEventListener('click', paintCurline)
+  textarea.addEventListener('select', paintCurline)
+  document.addEventListener('sukoshi:curline', paintCurline)
+  // Saltos programáticos (ir a línea, consola→código) tampoco avisan.
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === textarea) paintCurline()
+  })
+
+  // Historial propio por instancia: el nativo se rompe con ediciones
+  // programáticas (setRangeText) y hay 4 editores (principal + 3 panes).
+  // Se guarda el estado previo cuando hay pausa al escribir (800ms).
+  const undoStack = []
+  const redoStack = []
+  let lastPush = 0
+  let prevValue = textarea.value
+  let lastSel = [0, 0]
+  const UNDO_IDLE = 800
+  const UNDO_MAX = 100
+
+  const pushUndo = (snap) => {
+    undoStack.push(snap)
+    if (undoStack.length > UNDO_MAX) undoStack.shift()
+  }
+
+  function recordUndo(force = false) {
+    const now = Date.now()
+    if (!force && now - lastPush < UNDO_IDLE) return
+    lastPush = now
+    if (prevValue.length > 1000000) return
+    const snap = { value: prevValue, s: lastSel[0], e: lastSel[1] }
+    const top = undoStack[undoStack.length - 1]
+    // Mismo estado (comando sin efecto): refresca sin matar el redo.
+    if (top && top.value === snap.value) {
+      undoStack[undoStack.length - 1] = snap
+      return
+    }
+    pushUndo(snap)
+    redoStack.length = 0
+  }
+
+  function applySnapshot(st) {
+    textarea.value = st.value
+    textarea.setSelectionRange(Math.min(st.s, st.value.length), Math.min(st.e, st.value.length))
+    commitValue(st.value)
+    renderGutter()
+    autosize()
+    scheduleRender()
+    fireActivity()
+    prevValue = st.value
+    lastSel = [textarea.selectionStart, textarea.selectionEnd]
+    lastPush = Date.now()
+  }
+
+  function curSnapshot() {
+    return { value: textarea.value, s: textarea.selectionStart, e: textarea.selectionEnd }
+  }
+
+  function undo() {
+    if (!undoStack.length) return false
+    const prev = undoStack.pop()
+    const cur = curSnapshot()
+    if (cur.value !== prev.value) {
+      redoStack.push(cur)
+      if (redoStack.length > UNDO_MAX) redoStack.shift()
+    }
+    applySnapshot(prev)
+    return true
+  }
+
+  function redo() {
+    if (!redoStack.length) return false
+    const next = redoStack.pop()
+    const cur = curSnapshot()
+    if (cur.value !== next.value) pushUndo(cur)
+    applySnapshot(next)
+    return true
+  }
+
+  function resetHistory() {
+    undoStack.length = 0
+    redoStack.length = 0
+    prevValue = textarea.value
+    lastSel = [textarea.selectionStart, textarea.selectionEnd]
+    lastPush = Date.now()
+  }
+
   textarea.addEventListener('input', () => {
+    recordUndo()
     commitValue(textarea.value)
     scheduleGutter()
     autosize()
     scheduleRender()
     if (detect) scheduleDetect()
     fireActivity()
+    prevValue = textarea.value
+    lastSel = [textarea.selectionStart, textarea.selectionEnd]
+    paintCurline()
   })
   // Cursor/selección también mueven el footer (Ln/Col), no solo el contenido.
   for (const ev of ['click', 'keyup', 'select']) {
-    textarea.addEventListener(ev, fireActivity)
+    textarea.addEventListener(ev, () => {
+      lastSel = [textarea.selectionStart, textarea.selectionEnd]
+      fireActivity()
+    })
   }
   stage.addEventListener('scroll', () => {
     if (raf) return
@@ -141,7 +258,12 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     })
   }, { passive: true })
 
-  // Snippets: palabra + Tab se expande (ver chuleta). Si no, 2 espacios.
+  // Snippets: palabra + Tab se expande (ver chuleta). `|` = cursor.
+  // JS_SNIPPETS solo en el pane JS del playground.
+  const JS_SNIPPETS = {
+    log: 'console.log(|)',
+    fn: 'function name(|) {\n  \n}',
+  }
   const SNIPPETS = {
     fecha: () => new Date().toISOString().slice(0, 10),
     hora: () => new Date().toTimeString().slice(0, 5),
@@ -149,17 +271,100 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   }
 
-  // Tab inserta 2 espacios para no perder el foco ni romper markdown.
+  // Escanea la abreviatura antes del cursor (respeta []{}() y comillas).
+  function scanAbbrev(line, end) {
+    let i = end
+    let depth = 0
+    let quote = null
+    while (i > 0) {
+      const c = line[i - 1]
+      if (quote) {
+        if (c === quote) quote = null
+        i--
+        continue
+      }
+      if (c === '"' || c === "'") {
+        quote = c
+        i--
+        continue
+      }
+      if (c === ')' || c === ']' || c === '}') {
+        depth++
+        i--
+        continue
+      }
+      if (c === '(' || c === '[' || c === '{') {
+        if (depth > 0) {
+          depth--
+          i--
+          continue
+        }
+        break
+      }
+      if (depth === 0 && (c === ' ' || c === '\t' || c === ';')) break
+      i--
+    }
+    return [i, line.slice(i, end)]
+  }
+
+  // Tag abierto que envuelve la línea (para tags implícitos tipo .item>li).
+  function parentTagOf(text, upto) {
+    const stack = []
+    const re = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)\b[^>]*?(\/?)>/g
+    let m
+    while ((m = re.exec(text)) && m.index < upto) {
+      const t = m[2].toLowerCase()
+      if (VOID_TAGS.has(t) || m[3]) continue
+      if (m[1]) {
+        const ix = stack.lastIndexOf(t)
+        if (ix >= 0) stack.length = ix
+      } else {
+        stack.push(t)
+      }
+    }
+    return stack.length ? stack[stack.length - 1] : null
+  }
+
+  // Tab: emmet (playground) > snippets > 2 espacios.
   textarea.addEventListener('keydown', (e) => {
     if (e.key === 'Tab' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault()
       const { selectionStart: s, selectionEnd: en, value } = textarea
+      if (emmet && s === en) {
+        const ls = value.lastIndexOf('\n', s - 1) + 1
+        const [a0, abbr] = scanAbbrev(value.slice(ls, s), s - ls)
+        const indent = (value.slice(ls, ls + a0).match(/^\s*/) || [''])[0]
+        let out = null
+        try {
+          if (emmet === 'html' && looksLikeHTML(abbr)) {
+            out = expandHTML(abbr, indent, parentTagOf(value, ls))
+          } else if (emmet === 'css' && looksLikeCSS(abbr)) {
+            out = expandCSS(abbr)
+          }
+        } catch { out = null }
+        if (out) {
+          e.preventDefault()
+          textarea.setRangeText(out, ls + a0, s, 'end')
+          // Cursor en el primer hueco vacío (`.box` → dentro del div).
+          const empty = out.indexOf('><')
+          const prevLines = empty >= 0 ? out.slice(0, empty).split('\n').length - 1 : 0
+          const pos = empty >= 0 ? ls + a0 + empty + 1 + indent.length * prevLines : ls + a0 + out.length
+          textarea.setSelectionRange(pos, pos)
+          textarea.dispatchEvent(new Event('input', { bubbles: true }))
+          return
+        }
+      }
       if (s === en) {
         const m = value.slice(0, s).match(/([A-Za-záéíóúñü-]+)$/)
-        const snip = m && SNIPPETS[m[1].toLowerCase()]
+        const word = m && m[1]
+        const snip = word && ((emmet === 'js' && JS_SNIPPETS[word]) || SNIPPETS[word.toLowerCase()])
         if (snip) {
-          const text = typeof snip === 'function' ? snip() : snip
-          textarea.setRangeText(text, s - m[1].length, s, 'end')
+          const raw = typeof snip === 'function' ? snip() : snip
+          const ci = raw.indexOf('|')
+          const text = ci >= 0 ? raw.slice(0, ci) + raw.slice(ci + 1) : raw
+          textarea.setRangeText(text, s - word.length, s, 'end')
+          const pos = s - word.length + (ci >= 0 ? ci : text.length)
+          textarea.setSelectionRange(pos, pos)
           textarea.dispatchEvent(new Event('input', { bubbles: true }))
           return
         }
@@ -222,6 +427,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     pre.style.whiteSpace = wrap ? 'pre-wrap' : 'pre'
     autosize()
     scheduleRender()
+    paintCurline()
   }
   applyWrap()
 
@@ -263,6 +469,22 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       textarea.dispatchEvent(new Event('input', { bubbles: true }))
       return
     }
+    // Auto-cierre de tags HTML: `<div` + `>` crea `</div>` (voids excluidos).
+    if (e.key === '>' && langOf() === 'html' && s === en) {
+      const m = /<([a-zA-Z][a-zA-Z0-9-]*)\b[^<>]*$/.exec(value.slice(0, s))
+      const tag = m && m[1].toLowerCase()
+      if (tag && !VOID_TAGS.has(tag)) {
+        e.preventDefault()
+        if (value[s] === '>') {
+          textarea.setSelectionRange(s + 1, s + 1)
+          return
+        }
+        textarea.setRangeText('></' + tag + '>', s, s, 'end')
+        textarea.setSelectionRange(s + 1, s + 1)
+        textarea.dispatchEvent(new Event('input', { bubbles: true }))
+        return
+      }
+    }
     if (e.key === 'Enter') {
       // Enter entre {} [] () abre bloque con indent y cursor al medio.
       if (s === en && s > 0 && s < value.length) {
@@ -280,6 +502,33 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       }
       const ls = value.lastIndexOf('\n', s - 1) + 1
       const line = value.slice(ls, s)
+      // En HTML: entre `><` abre línea indentada; si no, hereda indent.
+      if (langOf() === 'html' && s === en) {
+        const indent = (line.match(/^\s*/) || [''])[0]
+        if (s > 0 && s < value.length && value[s - 1] === '>' && value[s] === '<') {
+          e.preventDefault()
+          textarea.setRangeText('\n' + indent + '  \n' + indent, s, s, 'end')
+          const mid = s + 1 + indent.length + 2
+          textarea.setSelectionRange(mid, mid)
+          textarea.dispatchEvent(new Event('input', { bubbles: true }))
+          return
+        }
+        if (indent) {
+          e.preventDefault()
+          textarea.setRangeText('\n' + indent, s, s, 'end')
+          textarea.dispatchEvent(new Event('input', { bubbles: true }))
+          return
+        }
+      }
+      // En CSS: hereda indent y suma un nivel tras `{` (`.box {` ⏎).
+      if (langOf() === 'css' && s === en) {
+        e.preventDefault()
+        const indent = (line.match(/^\s*/) || [''])[0]
+        const extra = /\{\s*$/.test(line) ? '  ' : ''
+        textarea.setRangeText('\n' + indent + extra, s, en, 'end')
+        textarea.dispatchEvent(new Event('input', { bubbles: true }))
+        return
+      }
       const rest = value.slice(s, value.indexOf('\n', s) < 0 ? value.length : value.indexOf('\n', s))
       const m = line.match(/^(\s*)(- \[( |x)\] |[-*+] |\d+[.)] )/)
       if (m && s === en) {
@@ -310,7 +559,9 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       syncScroll()
       autosize()
       scheduleRender()
+      paintCurline()
       fireActivity()
+      resetHistory()
     },
     setValue: (v) => {
       textarea.value = v ?? ''
@@ -320,7 +571,9 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       syncScroll()
       autosize()
       scheduleRender()
+      paintCurline()
       fireActivity()
+      resetHistory()
     },
     focus: () => textarea.focus(),
     onActivity: (cb) => { activityCbs.push(cb) },
@@ -333,16 +586,26 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
       renderGutter()
       syncScroll()
       scheduleRender()
+      paintCurline()
     },
     duplicateLines,
     moveLines,
     changeCase,
     joinLines,
     sortLines,
+    toggleComment,
+    undo,
+    redo,
     formatTable,
     toggleWrapLines: () => {
       wrap = !wrap
       try { localStorage.setItem('sukoshi-wrap', wrap ? '1' : '0') } catch { /* sin storage */ }
+      applyWrap()
+      return wrap
+    },
+    // Ajuste impuesto desde fuera (playground) sin tocar el ajuste global.
+    setWrap: (v) => {
+      wrap = !!v
       applyWrap()
       return wrap
     },
@@ -357,6 +620,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
   }
 
   function duplicateLines() {
+    recordUndo(true)
     const { selectionStart: a, selectionEnd: b, value: v } = textarea
     const [s] = lineBounds(a)
     const [, e] = lineBounds(Math.max(b - 1, a))
@@ -375,6 +639,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
   }
 
   function moveLines(dir) {
+    recordUndo(true)
     const { selectionStart: a, selectionEnd: b, value: v } = textarea
     const [s] = lineBounds(a)
     const [, e] = lineBounds(Math.max(b - 1, a))
@@ -411,6 +676,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
   }
 
   function changeCase(mode) {
+    recordUndo(true)
     const { selectionStart: a, selectionEnd: b, value } = textarea
     const [s, e] = blockRange()
     const block = value.slice(s, e)
@@ -422,6 +688,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
   }
 
   function joinLines() {
+    recordUndo(true)
     const { value } = textarea
     const [s, e] = blockRange()
     const joined = value.slice(s, e).split('\n').map((l) => l.trim()).filter((l) => l !== '').join(' ')
@@ -431,6 +698,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
   }
 
   function sortLines() {
+    recordUndo(true)
     const { selectionStart: a, selectionEnd: b, value } = textarea
     if (b === a) return
     const [s, e] = blockRange()
@@ -444,6 +712,7 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
 
   // Alinea la tabla Markdown bajo el cursor (ancho por columna + :---:/---:/:--:).
   function formatTable() {
+    recordUndo(true)
     const { selectionStart: a, value } = textarea
     const lines = value.split('\n')
     let row = 0
@@ -495,7 +764,50 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
     textarea.dispatchEvent(new Event('input', { bubbles: true }))
   }
 
+  // Comentar línea(s) según lenguaje: //, /* */ o <!-- -->. Toggle.
+  function toggleComment() {
+    recordUndo(true)
+    const lang = langOf()
+    const open = lang === 'css' ? '/*' : lang === 'js' ? '//' : '<!--'
+    const close = lang === 'css' ? '*/' : lang === 'js' ? '' : '-->'
+    const { selectionStart: a, selectionEnd: b, value } = textarea
+    const [s] = lineBounds(a)
+    const [, e] = lineBounds(Math.max(b - 1, a))
+    const lines = value.slice(s, e).split('\n')
+    const targets = lines.map((l, i) => [l, /^\s*$/.test(l) ? -1 : i]).filter(([, i]) => i >= 0)
+    if (!targets.length) return
+    let out
+    if (!close) {
+      const on = targets.every(([l]) => /^\s*\/\//.test(l))
+      out = lines.map((l, i) => {
+        if (!targets.some(([, j]) => j === i)) return l
+        const m = /^(\s*)(.*)$/.exec(l)
+        return on ? m[1] + m[2].replace(/^\/\/ ?/, '') : m[1] + '// ' + m[2]
+      })
+    } else {
+      const on = targets.every(([l]) => {
+        const t = l.trim()
+        return t.startsWith(open) && t.endsWith(close)
+      })
+      out = lines.map((l, i) => {
+        if (!targets.some(([, j]) => j === i)) return l
+        const m = /^(\s*)(.*)$/.exec(l)
+        if (on) {
+          return m[1] + m[2].replace(new RegExp('^' + escRe(open) + '\\s?'), '').replace(new RegExp('\\s?' + escRe(close) + '$'), '')
+        }
+        return `${m[1]}${open} ${m[2]} ${close}`
+      })
+    }
+    textarea.setRangeText(out.join('\n'), s, e, 'select')
+    textarea.dispatchEvent(new Event('input', { bubbles: true }))
+  }
+
+  function escRe(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
   function toggleWrap(prefix, suffix = prefix) {
+    recordUndo(true)
     const { selectionStart: s, selectionEnd: e, value } = textarea
     const sel = value.slice(s, e)
     const before = value.slice(Math.max(0, s - prefix.length), s)

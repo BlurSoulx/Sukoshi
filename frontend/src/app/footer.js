@@ -1,4 +1,5 @@
 import { getExt, tabInfo, onTabsChange } from './state.js'
+import { t } from './i18n.js'
 
 export function initFooter(editor) {
   const posEl = document.getElementById('st-pos')
@@ -17,6 +18,7 @@ export function initFooter(editor) {
 
   editor.onActivity(refresh)
   onTabsChange(refresh)
+  document.addEventListener('sukoshi:lang', refresh)
   refresh()
   return { refresh }
 
@@ -28,18 +30,18 @@ export function initFooter(editor) {
     for (let i = 0; i < off; i++) {
       if (v[i] === '\n') { line++; lastNl = i }
     }
-    const t = v.trim()
-    const words = t ? t.split(/\s+/).length : 0
+    const trimmed = v.trim()
+    const words = trimmed ? trimmed.split(/\s+/).length : 0
     posEl.textContent = `Ln ${line}, Col ${off - lastNl}`
     const [ss, se] = editor.selection()
     statsEl.textContent = se > ss
-      ? `${se - ss} seleccionados`
-      : `${words} palabras · ${v.length} caracteres · ${editor.lineCount()} líneas`
+      ? `${se - ss} ${t('ft.sel')}`
+      : `${words} ${t('ft.words')} · ${v.length} ${t('ft.chars')} · ${editor.lineCount()} ${t('ft.lines')}`
     typeEl.textContent =
-      getExt() === '.txt' ? 'Texto plano' :
+      getExt() === '.txt' ? t('ft.plain') :
       getExt() === '.html' ? 'HTML' :
       getExt() === '.css' ? 'CSS' :
-      getExt() === '.js' ? 'JavaScript' : 'Markdown'
+      getExt() === '.js' ? 'JavaScript' : t('ft.markdown')
     const { index, total } = tabInfo()
     tabsEl.hidden = total < 2
     tabsEl.textContent = `${index}/${total}`

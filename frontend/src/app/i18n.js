@@ -1,0 +1,327 @@
+// Idiomas: español + inglés. Textos estáticos vía data-i18n en el HTML,
+// dinámicos con t() en cada apertura/render (sin re-render global).
+const STR = {
+  es: {
+    'nav.new': 'Nuevo documento',
+    'nav.open': 'Abrir archivo',
+    'nav.save': 'Guardar',
+    'nav.settings': 'Configuración',
+    'nav.min': 'Minimizar',
+    'nav.max': 'Maximizar',
+    'nav.close': 'Cerrar',
+    'pb.layout': 'Disposición',
+    'pb.console': 'Consola',
+    'pb.more': 'Más',
+    'console.title': 'Consola',
+    'console.clear': 'Limpiar',
+    'console.evalPh': '› evaluar JS…',
+    'modal.close': 'Cerrar',
+    'cmd.replacePh': 'Reemplazar',
+    'set.title': 'Configuración',
+    'set.appearance': 'Apariencia',
+    'set.opacity': 'Opacidad del fondo',
+    'set.fontSize': 'Tamaño de fuente',
+    'set.theme': 'Tema',
+    'set.font': 'Fuente',
+    'set.accent': 'Color de acento',
+    'set.accentAuto': 'Usar el del tema',
+    'set.curline': 'Resaltar línea actual',
+    'set.themedPreview': 'Fondo del preview según tema',
+    'set.general': 'General',
+    'set.autosave': 'Autoguardado (10s)',
+    'set.language': 'Idioma',
+    'set.reset': 'Restablecer',
+    'set.themeAuto': 'Auto (SO)',
+    'set.fontSystem': 'Sistema',
+    'group.file': 'Archivo',
+    'group.edit': 'Edición',
+    'group.tabs': 'Pestañas',
+    'group.play': 'Playground',
+    'group.view': 'Vista',
+    'group.app': 'App',
+    'group.recent': 'Recientes',
+    'cmd.new': 'Nuevo documento',
+    'cmd.open': 'Abrir archivo…',
+    'cmd.save': 'Guardar',
+    'cmd.saveAs': 'Guardar como…',
+    'cmd.saveAll': 'Guardar todo',
+    'cmd.closeOthers': 'Cerrar otras pestañas',
+    'cmd.openRecent': 'Abrir reciente…',
+    'cmd.find': 'Buscar en el documento…',
+    'cmd.findAll': 'Buscar en pestañas…',
+    'cmd.replace': 'Reemplazar en el documento…',
+    'cmd.goto': 'Ir a la línea…',
+    'cmd.headings': 'Ir a encabezado…',
+    'cmd.bold': 'Negrita',
+    'cmd.italic': 'Cursiva',
+    'cmd.strike': 'Tachado',
+    'cmd.upper': 'MAYÚSCULAS',
+    'cmd.lower': 'minúsculas',
+    'cmd.join': 'Unir líneas',
+    'cmd.sort': 'Ordenar líneas',
+    'cmd.table': 'Formatear tabla',
+    'cmd.comment': 'Comentar línea',
+    'cmd.undo': 'Deshacer',
+    'cmd.redo': 'Rehacer',
+    'cmd.copyPath': 'Copiar ruta del archivo',
+    'cmd.wrap': 'Ajuste de línea',
+    'cmd.tabs': 'Pestañas…',
+    'cmd.grid': 'Ver pestañas en grid…',
+    'cmd.reopen': 'Reabrir pestaña cerrada',
+    'cmd.tpl': 'Playground: plantilla…',
+    'cmd.syntax': 'Sintaxis Markdown…',
+    'cmd.shortcuts': 'Atajos de teclado…',
+    'cmd.exportMD': 'Exportar Markdown a HTML…',
+    'cmd.zen': 'Modo zen',
+    'cmd.mdPreview': 'Vista previa Markdown',
+    'cmd.play': 'Playground web',
+    'cmd.external': 'Playground: abrir en navegador',
+    'cmd.zip': 'Playground: exportar .zip',
+    'cmd.single': 'Playground: exportar .html único…',
+    'cmd.settings': 'Configuración…',
+    'cmd.close': 'Cerrar',
+    'ph.find': 'Buscar',
+    'ph.goto': 'Número de línea',
+    'ph.tabs': 'Buscar pestaña…',
+    'ph.headings': 'Buscar encabezado…',
+    'ph.playtpl': 'Elegir plantilla…',
+    'ph.all': 'Buscar en pestañas…',
+    'ph.recent': 'Abrir reciente…',
+    'ph.commands': 'Escribe un comando…',
+    'menu.view': 'Vista',
+    'menu.live': 'Vivo',
+    'menu.out': 'Salida',
+    'menu.viewport': 'Vista previa',
+    'menu.solo': 'Solo preview',
+    'menu.zoom': 'Zoom del preview',
+    'menu.wrap': 'Ajuste de línea',
+    'menu.pause': 'Pausar vivo',
+    'menu.rerun': 'Recargar preview',
+    'menu.external': 'Abrir en navegador',
+    'menu.single': 'Exportar .html único',
+    'menu.zip': 'Exportar .zip',
+    'cf.tplTitle': 'Aplicar plantilla',
+    'cf.tplMsg': 'Reemplaza el contenido actual de los 3 paneles.',
+    'cf.cancel': 'Cancelar',
+    'cf.apply': 'Aplicar',
+    'cf.unsaved': 'Tienes cambios sin guardar.',
+    'cf.skip': 'Omitir',
+    'cf.discard': 'Descartar',
+    'cf.save': 'Guardar',
+    'cf.reloadMsg': 'Cambió en disco. ¿Recargar y perder tus cambios?',
+    'cf.reload': 'Recargar',
+    'ft.sel': 'seleccionados',
+    'ft.words': 'palabras',
+    'ft.chars': 'caracteres',
+    'ft.lines': 'líneas',
+    'ft.plain': 'Texto plano',
+    'ft.markdown': 'Markdown',
+    'play.tplBlank': 'En blanco',
+    'play.tplCard': 'Tarjeta centrada',
+    'play.tplGrid': 'Grid básico',
+    'play.errUnclosed': 'cierre sin abrir',
+    'play.errOpen': 'sin cerrar',
+    'play.errExtra': 'cierre de más',
+    'play.errBrace': 'llave sin cerrar',
+    'play.layTop': 'Editores arriba',
+    'play.layLeft': 'Editores a la izquierda',
+    'play.layBottom': 'Editores abajo',
+    'play.layRight': 'Editores a la derecha',
+    'play.layReset': 'Disposición original',
+    'play.gotoLine': 'Ir a la línea',
+    'cheat.syntax': 'Sintaxis Markdown',
+    'cheat.shortcuts': 'Atajos de teclado',
+    'export.doc': 'documento',
+  },
+  en: {
+    'nav.new': 'New document',
+    'nav.open': 'Open file',
+    'nav.save': 'Save',
+    'nav.settings': 'Settings',
+    'nav.min': 'Minimize',
+    'nav.max': 'Maximize',
+    'nav.close': 'Close',
+    'pb.layout': 'Layout',
+    'pb.console': 'Console',
+    'pb.more': 'More',
+    'console.title': 'Console',
+    'console.clear': 'Clear',
+    'console.evalPh': '› evaluate JS…',
+    'modal.close': 'Close',
+    'cmd.replacePh': 'Replace',
+    'set.title': 'Settings',
+    'set.appearance': 'Appearance',
+    'set.opacity': 'Background opacity',
+    'set.fontSize': 'Font size',
+    'set.theme': 'Theme',
+    'set.font': 'Font',
+    'set.accent': 'Accent color',
+    'set.accentAuto': 'Use theme accent',
+    'set.curline': 'Highlight current line',
+    'set.themedPreview': 'Preview follows theme',
+    'set.general': 'General',
+    'set.autosave': 'Autosave (10s)',
+    'set.language': 'Language',
+    'set.reset': 'Reset',
+    'set.themeAuto': 'Auto (OS)',
+    'set.fontSystem': 'System',
+    'group.file': 'File',
+    'group.edit': 'Edit',
+    'group.tabs': 'Tabs',
+    'group.play': 'Playground',
+    'group.view': 'View',
+    'group.app': 'App',
+    'group.recent': 'Recent',
+    'cmd.new': 'New document',
+    'cmd.open': 'Open file…',
+    'cmd.save': 'Save',
+    'cmd.saveAs': 'Save as…',
+    'cmd.saveAll': 'Save all',
+    'cmd.closeOthers': 'Close other tabs',
+    'cmd.openRecent': 'Open recent…',
+    'cmd.find': 'Find in document…',
+    'cmd.findAll': 'Find in tabs…',
+    'cmd.replace': 'Replace in document…',
+    'cmd.goto': 'Go to line…',
+    'cmd.headings': 'Go to heading…',
+    'cmd.bold': 'Bold',
+    'cmd.italic': 'Italic',
+    'cmd.strike': 'Strikethrough',
+    'cmd.upper': 'UPPERCASE',
+    'cmd.lower': 'lowercase',
+    'cmd.join': 'Join lines',
+    'cmd.sort': 'Sort lines',
+    'cmd.table': 'Format table',
+    'cmd.comment': 'Toggle line comment',
+    'cmd.undo': 'Undo',
+    'cmd.redo': 'Redo',
+    'cmd.copyPath': 'Copy file path',
+    'cmd.wrap': 'Word wrap',
+    'cmd.tabs': 'Tabs…',
+    'cmd.grid': 'Show tabs in grid…',
+    'cmd.reopen': 'Reopen closed tab',
+    'cmd.tpl': 'Playground: template…',
+    'cmd.syntax': 'Markdown syntax…',
+    'cmd.shortcuts': 'Keyboard shortcuts…',
+    'cmd.exportMD': 'Export Markdown to HTML…',
+    'cmd.zen': 'Zen mode',
+    'cmd.mdPreview': 'Markdown preview',
+    'cmd.play': 'Web playground',
+    'cmd.external': 'Playground: open in browser',
+    'cmd.zip': 'Playground: export .zip',
+    'cmd.single': 'Playground: export single .html…',
+    'cmd.settings': 'Settings…',
+    'cmd.close': 'Close',
+    'ph.find': 'Find',
+    'ph.goto': 'Line number',
+    'ph.tabs': 'Find tab…',
+    'ph.headings': 'Find heading…',
+    'ph.playtpl': 'Pick a template…',
+    'ph.all': 'Find in tabs…',
+    'ph.recent': 'Open recent…',
+    'ph.commands': 'Type a command…',
+    'menu.view': 'View',
+    'menu.live': 'Live',
+    'menu.out': 'Output',
+    'menu.viewport': 'Preview size',
+    'menu.solo': 'Preview only',
+    'menu.zoom': 'Preview zoom',
+    'menu.wrap': 'Word wrap',
+    'menu.pause': 'Pause live',
+    'menu.rerun': 'Reload preview',
+    'menu.external': 'Open in browser',
+    'menu.single': 'Export single .html',
+    'menu.zip': 'Export .zip',
+    'cf.tplTitle': 'Apply template',
+    'cf.tplMsg': 'Replaces the current content of all 3 panes.',
+    'cf.cancel': 'Cancel',
+    'cf.apply': 'Apply',
+    'cf.unsaved': 'You have unsaved changes.',
+    'cf.skip': 'Skip',
+    'cf.discard': 'Discard',
+    'cf.save': 'Save',
+    'cf.reloadMsg': 'Changed on disk. Reload and lose your changes?',
+    'cf.reload': 'Reload',
+    'ft.sel': 'selected',
+    'ft.words': 'words',
+    'ft.chars': 'characters',
+    'ft.lines': 'lines',
+    'ft.plain': 'Plain text',
+    'ft.markdown': 'Markdown',
+    'play.tplBlank': 'Blank',
+    'play.tplCard': 'Centered card',
+    'play.tplGrid': 'Basic grid',
+    'play.errUnclosed': 'stray closing tag',
+    'play.errOpen': 'unclosed',
+    'play.errExtra': 'extra closing brace',
+    'play.errBrace': 'unclosed brace',
+    'play.layTop': 'Editors on top',
+    'play.layLeft': 'Editors on the left',
+    'play.layBottom': 'Editors below',
+    'play.layRight': 'Editors on the right',
+    'play.layReset': 'Original layout',
+    'play.gotoLine': 'Go to line',
+    'cheat.syntax': 'Markdown syntax',
+    'cheat.shortcuts': 'Keyboard shortcuts',
+    'export.doc': 'document',
+  },
+}
+
+const KEY = 'sukoshi-lang'
+
+function autoLang() {
+  try {
+    return (navigator.language || 'es').toLowerCase().startsWith('es') ? 'es' : 'en'
+  } catch {
+    return 'es'
+  }
+}
+
+function load() {
+  try {
+    const s = localStorage.getItem(KEY)
+    if (s === 'es' || s === 'en' || s === 'auto') return s
+  } catch { /* sin storage */ }
+  return 'auto'
+}
+
+let setting = load()
+
+export function langSetting() {
+  return setting
+}
+
+export function getLang() {
+  return setting === 'en' ? 'en' : setting === 'es' ? 'es' : autoLang()
+}
+
+export function t(k) {
+  const L = STR[getLang()] ?? STR.es
+  return L[k] ?? STR.es[k] ?? k
+}
+
+export function setLang(v) {
+  setting = v === 'es' || v === 'en' || v === 'auto' ? v : 'auto'
+  try {
+    localStorage.setItem(KEY, setting)
+  } catch { /* sin storage */ }
+  applyI18n()
+  document.dispatchEvent(new CustomEvent('sukoshi:lang'))
+}
+
+export function applyI18n() {
+  const lang = getLang()
+  document.documentElement.lang = lang
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.dataset.i18n)
+  })
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAria))
+  })
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    el.setAttribute('title', t(el.dataset.i18nTitle))
+  })
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => {
+    el.setAttribute('placeholder', t(el.dataset.i18nPh))
+  })
+}

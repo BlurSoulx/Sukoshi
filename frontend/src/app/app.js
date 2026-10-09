@@ -1,13 +1,16 @@
 import { createEditor } from './editor.js'
 import { initShortcuts } from './shortcuts.js'
 import { initFooter } from './footer.js'
-import { initSettings } from './settings.js'
+import { initSettings, getSetting } from './settings.js'
+import { applyI18n } from './i18n.js'
 import { initSession } from './session.js'
 import { initWatch } from './watch.js'
 import { adoptFile } from './files.js'
+import { loadInto } from './play.js'
 import { setDirty } from './state.js'
 
 export function initApp() {
+  applyI18n()
   const textarea = document.getElementById('editor')
   const gutter = document.getElementById('gutter')
   if (!textarea || !gutter) throw new Error('Falta #editor o #gutter')
@@ -18,6 +21,7 @@ export function initApp() {
     stage: document.getElementById('stage'),
     pre: document.getElementById('hl'),
     detect: true,
+    showCurline: () => getSetting('curline') !== false,
   })
   initFooter(editor)
   const settings = initSettings()
@@ -33,7 +37,16 @@ export function initApp() {
   window.addEventListener('drop', async (e) => {
     e.preventDefault()
     if (window.go?.main?.App) return
-    for (const f of [...(e.dataTransfer?.files ?? [])].filter((x) => /\.(txt|md|markdown|html|css|js)$/i.test(x.name)).slice(0, 8)) {
+    const files = [...(e.dataTransfer?.files ?? [])].filter((x) => /\.(txt|md|markdown|html|css|js)$/i.test(x.name)).slice(0, 8)
+    if (document.body.classList.contains('play')) {
+      for (const f of files) {
+        const m = /\.([^.]+)$/.exec(f.name)
+        const lang = { html: 'html', css: 'css', js: 'js' }[m?.[1]?.toLowerCase()]
+        if (lang) loadInto(lang, await f.text())
+      }
+      return
+    }
+    for (const f of files) {
       adoptFile(editor, { content: await f.text(), filePath: '', fileName: f.name })
     }
   })
@@ -105,12 +118,17 @@ export function initApp() {
 
   // Sesión anterior (si existe) o documento en blanco. Bloqueado hasta
   // resolver para no pisar lo que el usuario escriba en esos ms.
+  // El catch garantiza que un restore roto jamás deje el editor bloqueado.
   textarea.disabled = true
   session.restore().then((ok) => {
     if (!ok) {
       editor.setValue('')
       setDirty(false)
     }
+  }).catch(() => {
+    editor.setValue('')
+    setDirty(false)
+  }).then(() => {
     textarea.disabled = false
     editor.focus()
   })

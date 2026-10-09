@@ -11,61 +11,51 @@
   --scrollbar: #2b2b2b;
   --scrollbar-hover: #3a3a3a;
   --search-bg: #1b1b1b;
+  /* Fondo común de menús/paneles flotantes: un pelín más oscuro, sigue a cada paleta. */
+  --menu-bg: color-mix(in srgb, var(--search-bg) 82%, black);
   --accent: #d29922;
   --on-accent: #141414;
   --overlay: rgb(0 0 0 / 0.55);
+  --c-kwd: #c678dd;
+  --c-str: #98c379;
+  --c-cmnt: #8a8f98;
+  --c-num: #d19a66;
+  --c-func: #61afef;
+  --c-oper: #9aa4b2;
+  --c-var: #e06c75;
+  --c-cls: #56b6c2;
+  --c-type: #e5c07b;
+  --c-bool: #d19a66;
+  --c-section: #61afef;
+  --c-deleted: #e06c75;
+  --c-insert: #98c379;
+  --c-err: #e06c75;
   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --font-size: 14px;
   --line-height: 1.6;
   color-scheme: dark;
 }
 
-/* Tema claro base: el sistema de temas queda listo para ampliar. */
+/* Solo el esquema nativo cambia por modo; los colores los pone la paleta. */
 :root[data-theme="light"] {
-  --bg: #f4f4f4;
-  --bg-rgb: 244 244 244;
-  --fg: #1a1a1a;
-  --gutter: #6e6e6e;
-  --caret: #1a1a1a;
-  --selection: #d3d3d3;
-  --scrollbar: #c6c6c6;
-  --scrollbar-hover: #adadad;
-  --search-bg: #ffffff;
-  --accent: #8a5a00;
-  --on-accent: #ffffff;
   color-scheme: light;
 }
 
-/* Tokens de resaltado (speed-highlight): One-Dark sobrio en oscuro. */
-.shj-syn-kwd { color: #c678dd; }
-.shj-syn-str { color: #98c379; }
-.shj-syn-cmnt { color: #8a8f98; font-style: italic; }
-.shj-syn-num { color: #d19a66; }
-.shj-syn-func { color: #61afef; }
-.shj-syn-oper { color: #9aa4b2; }
-.shj-syn-var { color: #e06c75; }
-.shj-syn-class { color: #d19a66; }
-.shj-syn-type { color: #e5c07b; }
-.shj-syn-bool { color: #d19a66; }
-.shj-syn-section { color: #61afef; }
-.shj-syn-deleted { color: #e06c75; }
-.shj-syn-insert { color: #98c379; }
-.shj-syn-err { color: #e06c75; }
-
-:root[data-theme="light"] .shj-syn-kwd { color: #a626a4; }
-:root[data-theme="light"] .shj-syn-str { color: #1a7f37; }
-:root[data-theme="light"] .shj-syn-cmnt { color: #6e7781; font-style: italic; }
-:root[data-theme="light"] .shj-syn-num { color: #9a6700; }
-:root[data-theme="light"] .shj-syn-func { color: #0550ae; }
-:root[data-theme="light"] .shj-syn-oper { color: #57606a; }
-:root[data-theme="light"] .shj-syn-var { color: #cf222e; }
-:root[data-theme="light"] .shj-syn-class { color: #9a6700; }
-:root[data-theme="light"] .shj-syn-type { color: #9a6700; }
-:root[data-theme="light"] .shj-syn-bool { color: #9a6700; }
-:root[data-theme="light"] .shj-syn-section { color: #0550ae; }
-:root[data-theme="light"] .shj-syn-deleted { color: #cf222e; }
-:root[data-theme="light"] .shj-syn-insert { color: #1a7f37; }
-:root[data-theme="light"] .shj-syn-err { color: #cf222e; }
+/* Tokens de resaltado (speed-highlight): los pone la paleta activa. */
+.shj-syn-kwd { color: var(--c-kwd); }
+.shj-syn-str { color: var(--c-str); }
+.shj-syn-cmnt { color: var(--c-cmnt); font-style: italic; }
+.shj-syn-num { color: var(--c-num); }
+.shj-syn-func { color: var(--c-func); }
+.shj-syn-oper { color: var(--c-oper); }
+.shj-syn-var { color: var(--c-var); }
+.shj-syn-class { color: var(--c-cls); }
+.shj-syn-type { color: var(--c-type); }
+.shj-syn-bool { color: var(--c-bool); }
+.shj-syn-section { color: var(--c-section); }
+.shj-syn-deleted { color: var(--c-deleted); }
+.shj-syn-insert { color: var(--c-insert); }
+.shj-syn-err { color: var(--c-err); }
 
 /* Fuentes del sistema (sin descargas): base lista para ampliar. */
 :root[data-font="consolas"] {
