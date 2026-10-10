@@ -1,135 +1,109 @@
-# Sukoshi — Minimal Markdown/Text Editor (Wails + Vanilla)
+<p align="center">
+  <img src="sukoshi.png" width="128" alt="Sukoshi" />
+</p>
 
-> Una caja de texto extremadamente rápida que casualmente es una aplicación de escritorio.
+<h1 align="center">Sukoshi</h1>
 
-Filosofía: **el editor es el producto. La interfaz prácticamente no existe.**
+<p align="center">
+  Editor minimalista de Markdown y texto plano, con playground web integrado.<br />
+  Rápido, offline y sin ruido: el editor es el producto, la interfaz casi no existe.
+</p>
 
-## Estado actual (etapa 1)
+<p align="center">
+  <strong><a href="https://github.com/BlurSoulx/Sukoshi/releases/tag/v0.1.0">Descargar v0.1.0 para Windows (portable, sin instalador)</a></strong>
+</p>
 
-- [x] Frontend Vite + Vanilla JS funcional (`pnpm dev` / `pnpm build` verificados)
-- [x] Editor `<textarea>` + gutter de números sincronizado con `requestAnimationFrame`
-- [x] Barra de comandos (`Ctrl+K` / `Ctrl+Shift+P`): nuevo, abrir, guardar, buscar, reemplazar, ir a línea, formato
-- [x] Buscar (`Ctrl+F`), reemplazar (`Ctrl+H`), ir a línea (`Ctrl+G`) desde la barra — sin paneles flotantes
-- [x] Footer mínimo: archivo (+●), Ln/Col, palabras, caracteres, líneas, tipo (Markdown/Texto plano)
-- [x] Pestañas sin UI visible: `Ctrl+T` nueva, `Ctrl+W` cierra (sale si es la última), `Ctrl+Tab` cicla, `Ctrl+Shift+Tab` grid estilo Alt+Tab (click/flechas/Enter), `Ctrl+K → Pestañas…` salta por nombre; footer muestra `i/n` en acento junto al archivo y toast transitorio al cambiar; cursor y dirty por pestaña
-- [x] Edición: fuente persistida (slider + `Ctrl+rueda`), ajuste de línea (`Alt+Z`), duplicar (`Ctrl+D`), mover líneas (`Alt+↑/↓`), auto-pares, listas con `Enter`, trim + salto final al guardar
-- [x] Vista: modo zen (`F11`, oculta barra+footer, persiste), índice de encabezados (`Ctrl+K → Ir a encabezado…`), chuleta de atajos (`F1`), exportar Markdown a HTML, footer con info de selección
-- [x] Texto: MAYÚS/minúsculas, unir líneas (`Ctrl+J`), ordenar líneas, copiar ruta, formatear tablas Markdown, snippets (`fecha`/`hora`/`tabla`/`lorem` + `Tab`), clic en gutter selecciona línea, comentar línea (`Ctrl+.`) por lenguaje, deshacer/rehacer propio (`Ctrl+Z`, `Ctrl+Shift+Z`/`Ctrl+Y`, paleta)
-- [x] Pestañas MRU (`Ctrl+Tab` va a la última usada, grid pre-selecciona MRU) y reabrir cerrada (`Ctrl+Shift+T`)
-- [x] Config: tema Auto (SO), autoguardado 10s (off por defecto)
-- [x] Archivos: recientes (`Ctrl+K → Abrir reciente…`), drag&drop a la ventana, sesión restaurada al abrir, recarga ante cambios externos
-- [x] Vista previa Markdown (`Ctrl+Shift+V`, split bajo demanda con `marked` + `DOMPurify`, render por frame en tiempo real)
-- [x] Resaltado html/css/js (`@speed-highlight/core`, ~9 kB): overlay `pre` + textarea transparente, solo viewport, colores por tema
-- [x] Extensión inteligente: tabs nuevas arrancan `untitled.txt` y suben a `.md`/`.html` según lo escrito (solo untitled, con histéresis)
-- [x] Selección siempre legible (`color` en `::selection` sobre el overlay)
-- [x] Abrir/guardar `.html/.css/.js` (diálogos, drop, footer indica el tipo)
-- [x] Playground web (`Ctrl+K → Playground web`): HTML/CSS/JS a la izquierda con resaltado, preview en vivo sandboxed a la derecha; buffers persistidos, sin tocar las pestañas
-- [x] Mini-Emmet vanilla (0 deps, solo playground): `.box`, `ul>li*3`, `+ ^ $ @ () [] {}` , `!`, `loremN`, tags implícitos, CSS (`m10`, `d:f`, `pos:a`…); 37 tests (`node emmet-test.mjs`)
-- [x] Playground: headers por tech (naranja/morado/amarillo), divisores arrastrables, colapso con doble clic (layout persistido), Enter entre llaves con indent, `Ctrl+1/2/3` y `Ctrl+Tab` entre panes
-- [x] Playground: layouts izq/der/arriba/abajo (selector en cruz + reset central), consola JS (logs+errores con punto de aviso, sin auto-apertura ni spam de repetidos), auto-cierre de tags HTML, playbar propia
-- [x] Playground: importar archivos con drop a su pane, validador HTML/CSS/JS (punto rojo junto a cada título), plantillas starter, viewports 100/768/390, pausa del vivo, fondo claro/oscuro, divisor del preview con mínimos
-- [x] Playground: playbar de 3 botones (layout en cruz con reset, consola, menú overflow), abrir en navegador vía handler del SO (Wails bloquea file://)
-- [x] Playground: preview con fondo de la paleta activa (violeta oscuro en SynthWave, etc.), en tiempo real al cambiar de tema; checkbox para fondo neutro
-- [x] Config: grupos Apariencia/General con iconos, dropdowns propios sin borde (tema oscuro, con radio y teclado)
-- [x] Config: acento personalizado (color picker + volver al del tema), resaltar línea actual (toggle), idioma Español/English (auto por defecto)
-- [x] Playground: atajos y paleta operan en el pane enfocado; `Ctrl+S` guarda el pane a disco
-- [x] Playground: consola REPL (evaluar JS en el contexto del preview), solo-preview, abrir en navegador externo, exportar .zip y .html único (inline), zoom del preview (`Ctrl+Plus/Minus/0`), ajuste de línea propio, snippets JS, wrap en panes
-- [x] Editor: guardar todo, cerrar otras pestañas, buscar en pestañas (`Ctrl+Shift+F`), errores JS con salto a línea
-- [x] Modal propio temático (Guardar/Descartar/Cancelar) en vez de `confirm()` del navegador; bloquea atajos mientras está abierto
-- [x] Chuleta de sintaxis (`Ctrl+K → Sintaxis Markdown…`): referencia rápida en modal ancho con header y X
-- [x] Paleta: últimos 5 comandos arriba (secciones Recientes/Comandos) e indicador acento en el ítem activo
-- [x] Scrollbars temáticas (WebKit + `scrollbar-color`) y gutter con ancho reservado hasta 9999 líneas
-- [x] Configuración (engranaje / `Ctrl+,` / paleta): opacidad del fondo, tema Auto (SO), fuente del sistema, autoguardado 10s (off por defecto); todo persiste en localStorage
-- [x] 9 temas en un solo registro (`themes.js`, ~5 kB): Sukoshi Oscuro/Claro, Dracula, Nord, Tokyo Night, Catppuccin Mocha, Gruvbox, Monokai y SynthWave '84; cambio instantáneo sin recargas
-- [x] Rendimiento: índice de líneas cacheado (gutter/footer/línea actual en O(log n)), playground de arranque perezoso, highlight solo del viewport, preview acotado por frame
-- [x] Apertura/guardado vía Wails Go + fallback navegador (para `pnpm dev` sin Wails)
-- [x] Ventana frameless preparada (`#drag` con `--wails-draggable: drag`)
-- [x] Verificado `wails build` → `build/bin/Sukoshi.exe` (Wails v2.16.0, Go 1.27.1)
-- [ ] Probar `wails dev` y uso real del editor
+---
 
-## Requisitos previos
+## Qué es
 
-| Herramienta | Verificación | Instalación oficial |
-|---|---|---|
-| Go 1.21+ | `go version` | Descargar desde https://go.dev/dl/ y seguir https://go.dev/doc/install. En Windows también vale `winget install Go.Go`. Asegúrate de que `~/go/bin` esté en el `PATH`. |
-| Wails CLI | `wails version` | `go install github.com/wailsapp/wails/v2/cmd/wails@latest` (documentación: https://wails.io/docs/gettingstarted/installation). Luego `wails doctor` (en Windows requiere runtime WebView2). |
-| Node.js 15+ | `node --version` | Solo como runtime de PNPM/Vite. |
-| PNPM | `pnpm --version` | https://pnpm.io/installation |
+Sukoshi es una app de escritorio (Wails + Go, frontend en Vanilla JS sin frameworks) para escribir `.txt` y `.md` al instante, y un modo playground para prototipar HTML/CSS/JS con preview en vivo sin salir de la app.
 
-> Entorno verificado: Go 1.27.1, Wails v2.16.0, `wails doctor` OK (WebView2 instalado).
+- **Sin Electron**: binario de ~12 MB que usa el WebView2 del sistema (~140 MB en RAM en reposo, 0% CPU).
+- **Sin dependencias pesadas**: 3 librerías JS (`marked`, `DOMPurify`, `@speed-highlight/core`), sin CDN, sin telemetría. Funciona offline.
+- **En español e inglés**, con 9 temas que cambian al instante.
 
-**Nunca usar npm.** Solo PNPM para paquetes JS. Wails se instala vía `go install`, no vía PNPM.
+## Descarga y uso
 
-## Instalación
+1. Descarga `Sukoshi-0.1.0-windows-x64.zip` desde [Releases](https://github.com/BlurSoulx/Sukoshi/releases/tag/v0.1.0).
+2. Descomprime y ejecuta `Sukoshi.exe`. Sin instalación.
+3. Requiere WebView2 (preinstalado en Windows 11 y en la mayoría de Windows 10).
 
-```bash
-# 1. Frontend
-cd frontend
-pnpm install
+> El ejecutable no está firmado: SmartScreen mostrará un aviso (`Más información → Ejecutar de todas formas`).
 
-# 2. Backend Go (cuando Go esté instalado)
-cd ..
-go mod tidy
-```
+## Características
 
-## Desarrollo
+**Editor**
+- Pestañas invisibles con grid estilo Alt+Tab (`Ctrl+Shift+Tab`), orden MRU y reabrir cerrada.
+- Sesión restaurada al abrir, recarga ante cambios externos, autoguardado opcional.
+- Buscar con marcas en el texto, anterior/siguiente y toggle de mayúsculas (`Ctrl+F`).
+- Markdown con preview en vivo y exportación a HTML; resaltado HTML/CSS/JS solo del viewport.
+- Mini-Emmet propio (0 dependencias), snippets, formateo de tablas, comentarios por lenguaje, deshacer/rehacer propio.
+
+**Playground web** (`Ctrl+\``)
+- Tres panes (HTML/CSS/JS) + preview sandboxed en vivo, 4 disposiciones, zoom, viewports, pausa.
+- Consola con REPL, validador por pane con salto a línea, plantillas, export a `.zip` y `.html` único.
+
+**Apariencia**
+- 9 temas (Sukoshi Oscuro/Claro, Dracula, Nord, Tokyo Night, Catppuccin Mocha, Gruvbox, Monokai, SynthWave '84), acento personalizable, modo zen (`F11`), opacidad y fuente configurables.
+
+## Atajos principales
+
+| Atajo | Acción |
+|---|---|
+| `Ctrl+K` | Paleta de comandos |
+| `Ctrl+F` / `Ctrl+H` / `Ctrl+G` | Buscar / reemplazar / ir a línea |
+| `Ctrl+Tab` / `Ctrl+Shift+Tab` | Cambiar pestaña / grid |
+| `Ctrl+\`` | Playground web |
+| `Ctrl+Shift+V` | Preview Markdown |
+| `F1` | Chuleta de atajos |
+| `F11` | Modo zen |
+| `Ctrl+,` | Configuración |
+
+## Compilar desde fuente
+
+| Herramienta | Verificación |
+|---|---|
+| Go 1.21+ | `go version` (`winget install Go.Go`) |
+| Wails CLI | `go install github.com/wailsapp/wails/v2/cmd/wails@latest` |
+| PNPM | https://pnpm.io/installation (**nunca npm**) |
 
 ```bash
-# Solo frontend en navegador (con fallback de archivos nativo del navegador)
-cd frontend
-pnpm dev
-# abre http://localhost:34115/
+# App completa
+wails build        # → build/bin/Sukoshi.exe
+wails dev          # desarrollo con recarga
 
-# App de escritorio completa (requiere Go + Wails)
-wails dev
+# Solo frontend en el navegador
+cd frontend && pnpm install && pnpm dev   # http://localhost:34115/
 ```
 
-## Producción
-
-```bash
-cd frontend
-pnpm build
-
-# Binario nativo (requiere Go + Wails)
-wails build
-```
+> Entorno verificado: Go 1.27.1, Wails v2.16.0, `wails doctor` OK.
 
 ## Arquitectura
 
 ```text
 JavaScript (frontend/src)
-  ↓  window.go.main.App.* (binding generado por Wails; `main` = paquete Go)
-Go (app.go)
+  ↓  window.go.main.App.* (binding generado por Wails)
+Go (app.go: solo filesystem + diálogos, sin lógica de editor)
   ↓  os.ReadFile / os.WriteFile / runtime dialogs
 Filesystem + diálogos nativos
 ```
 
-- `main.go`: ventana nativa Wails (`Frameless: true`, 900×650, translúcida), sirve `frontend/dist` embebido.
-- `app.go`: solo filesystem + diálogos (`OpenAndRead`, `WriteFile`, `SaveAs`, `ReadFile`, `Stat`, `PreviewExternal`, `ExportZip`). Sin lógica de editor.
-- `frontend/src/app/state.js`: multi-doc (`docs`, `activeId`, dirty/cursor por pestaña). Sin librerías de estado.
-- `frontend/src/app/editor.js`: `<textarea>` + gutter de 1 solo nodo, `requestAnimationFrame`. Tab = 2 espacios, pares, listas, duplicar/mover líneas, wrap conmutable.
-- `frontend/src/app/files.js`: binding Wails (fallback navegador), recientes, adoptar archivos (diálogo, drop, sesión).
-- `frontend/src/app/tabs.js`: new/close/cycle/grid/toast. `session.js`: restaura sesión. `watch.js`: recarga ante cambios externos.
-- `frontend/src/app/shortcuts.js` + `palette.js` (`Ctrl+K`): comandos, buscar/reemplazar, ir a línea, pestañas, recientes.
-- `frontend/src/app/preview.js`: Markdown bajo demanda (`marked` + `DOMPurify`, `Ctrl+Shift+V`).
-- `frontend/src/app/app.js`: cableado, drag-to-move, fix resize-maximizado, drop nativo en navegador.
-- `frontend/src/styles/`: `theme.css` (variables + temas/fuentes), `editor.css`, `settings.css`, `reset.css`. Sin frameworks.
-
-## Dependencias
-
-Frontend: `vite` (dev) + `marked` + `dompurify` (preview) + `@speed-highlight/core` (resaltado html/css/js, lazy). ~120 kB JS total.
-Go: `github.com/wailsapp/wails/v2`. Nada más. Sin analytics, sin CDN, sin fuentes remotas. Funciona offline.
+- `main.go`: ventana nativa (`Frameless: true`, translúcida), sirve `frontend/dist` embebido.
+- `frontend/src/app/`: `editor` (textarea + overlay, 1 nodo de gutter), `state` (multi-doc), `tabs`/`session`/`watch`, `shortcuts`+`palette`, `play`+`play-console`, `preview`, `settings` (temas+i18n), `i18n`, `dropdown`, `modal`, `syntax`, `footer`, `files`, `icons`, mini-Emmet y gramática CSS propias.
+- `frontend/src/styles/`: `reset`, `theme` (variables + `--menu-bg` común), `editor`, `settings`, `play`. Sin frameworks.
 
 ## Estructura
 
 ```text
 Sukoshi/
 ├── main.go / app.go / go.mod / wails.json
+├── sukoshi.png / build/windows/icon.ico (icono)
 └── frontend/
-    ├── index.html
-    ├── package.json / vite.config.js / pnpm-lock.yaml
-    └── src/
-        ├── main.js
-        ├── app/{app,editor,shortcuts,files,state}.js
-        └── styles/{reset,theme,editor}.css
+    ├── index.html / package.json / vite.config.js
+    └── src/{main.js, app/*.js, styles/*.css}
 ```
+
+## Historial de cambios
+
+Ver [CHANGELOG.md](CHANGELOG.md). La especificación original del proyecto vive en [Sukoshi.md](Sukoshi.md).
