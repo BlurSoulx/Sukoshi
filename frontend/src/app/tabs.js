@@ -150,6 +150,7 @@ export function newTab() {
 
 export async function closeTab(saveFn) {
   const d = activeDoc()
+  let discarded = false
   if (d.dirty) {
     const choice = await confirmModal({
       title: d.fileName,
@@ -162,8 +163,18 @@ export async function closeTab(saveFn) {
     })
     if (choice !== 'save' && choice !== 'discard') return 'cancelled'
     if (choice === 'save' && !(await saveFn())) return 'cancelled'
+    discarded = choice === 'discard'
   }
-  if (state.docs.length === 1) return 'quit'
+  if (state.docs.length === 1) {
+    // Salir descartando debe descartar de verdad: si no, la sesión resucita
+    // el doc sucio y al reabrir el archivo sale duplicado. Sin ruta el
+    // contenido se pierde (es lo pedido); con ruta se recarga del disco.
+    if (discarded) {
+      d.content = ''
+      setDirty(false)
+    }
+    return 'quit'
+  }
   closedStack.push({ content: d.content, filePath: d.filePath, fileName: d.fileName, dirty: d.dirty, sel: d.sel || 0 })
   if (closedStack.length > 20) closedStack.shift()
   removeDoc(d.id)

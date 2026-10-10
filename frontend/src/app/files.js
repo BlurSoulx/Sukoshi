@@ -1,5 +1,5 @@
-import { activeDoc, setFilePath, setDirty } from './state.js'
-import { newTab, pristineTab } from './tabs.js'
+import { state, activeDoc, setFilePath, setDirty } from './state.js'
+import { newTab, pristineTab, switchTab } from './tabs.js'
 
 const hasWails = () => typeof window.go?.main?.App !== 'undefined'
 
@@ -125,8 +125,23 @@ function trimForSave(editor) {
   ta.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
-// Lleva un archivo ya cargado a la pestaña actual (virgen) o a una nueva.
+// Lleva un archivo ya cargado a su pestaña si ya está abierto (sin duplicar),
+// a la actual si está virgen, o a una nueva.
 export function adoptFile(editor, { content, filePath, fileName }) {
+  if (filePath) {
+    const open = state.docs.find((d) => !!d.filePath && d.filePath.toLowerCase() === filePath.toLowerCase())
+    if (open) {
+      if (open.id !== activeDoc().id) switchTab(open.id)
+      // Recién leído del disco: solo pisa si no hay cambios propios.
+      if (!open.dirty && open.content !== content) {
+        open.content = content
+        editor.setValue(content)
+        setDirty(false)
+      }
+      editor.focus()
+      return
+    }
+  }
   if (!pristineTab()) newTab()
   editor.setValue(content)
   const d = activeDoc()
