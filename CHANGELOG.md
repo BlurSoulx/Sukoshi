@@ -1,5 +1,9 @@
 # Historial de cambios — Sukoshi
 
+## v0.2.1
+
+- [x] El primer guardado de un doc restaurado de la sesión pregunta (Guardar aquí / Guardar como…) en vez de sobrescribir
+
 ## v0.2.0
 
 - [x] "Abrir con" de Windows: clic derecho en cualquier archivo lo abre en pestaña (sin filtro de extensión)

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <strong><a href="https://github.com/BlurSoulx/Sukoshi/releases/tag/v0.2.0">Descargar v0.2.0 para Windows (portable, sin instalador)</a></strong>
+  <strong><a href="https://github.com/BlurSoulx/Sukoshi/releases/tag/v0.2.1">Descargar v0.2.1 para Windows (portable, sin instalador)</a></strong>
 </p>
 
 ---
@@ -25,7 +25,7 @@ Sukoshi es una app de escritorio (Wails + Go, frontend en Vanilla JS sin framewo
 
 ## Descarga y uso
 
-1. Descarga `Sukoshi-0.2.0-windows-x64.zip` desde [Releases](https://github.com/BlurSoulx/Sukoshi/releases/tag/v0.2.0).
+1. Descarga `Sukoshi-0.2.1-windows-x64.zip` desde [Releases](https://github.com/BlurSoulx/Sukoshi/releases/tag/v0.2.1).
 2. Descomprime y ejecuta `Sukoshi.exe`. Sin instalación.
 3. Requiere WebView2 (preinstalado en Windows 11 y en la mayoría de Windows 10).
 
