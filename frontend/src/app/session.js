@@ -24,6 +24,9 @@ function snapshot() {
     // El contenido solo se guarda si hace falta (nuevo o con cambios);
     // lo limpio se recarga del disco.
     const content = !d.filePath || d.dirty ? d.content : ''
+    // Una tab virgen (sin ruta, sin cambios, vacía) no se guarda:
+    // al abrir no resucita y no estorba a "Abrir con".
+    if (!d.filePath && !d.dirty && !content) continue
     size += content.length
     if (size > MAX_BYTES) break
     docs.push({ filePath: d.filePath, fileName: d.fileName, dirty: d.dirty, sel: d.sel || 0, content })

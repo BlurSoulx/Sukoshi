@@ -94,6 +94,14 @@ export function replaceDocs(list, activeIdx = 0) {
     d.sel = f.sel || 0
     state.docs.push(d)
   }
+  // Las untitled restauradas se renumeran (una sola → untitled.txt).
+  // Las con ruta no se tocan.
+  let n = 0
+  for (const d of state.docs) {
+    if (d.filePath) continue
+    n++
+    d.fileName = n === 1 ? 'untitled.txt' : `untitled-${n}.txt`
+  }
   state.activeId = state.docs[Math.min(activeIdx, state.docs.length - 1)].id
   state.mru = [state.activeId, ...state.docs.map((d) => d.id).filter((id) => id !== state.activeId)]
   emit()

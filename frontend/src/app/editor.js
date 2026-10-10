@@ -17,8 +17,10 @@ export function createEditor({ textarea, gutter = null, stage, pre, getLang = nu
   // Los panes del playground pasan su propio getLang/commit.
   const langOf = getLang ?? (() => LANGS[getExt()] ?? null)
   const commitValue = commit ?? ((v) => {
-    activeDoc().content = v
-    setDirty(true)
+    const d = activeDoc()
+    d.content = v
+    // Sin ruta y vacío = virgen otra vez (escribir y borrarlo todo no deja dirty).
+    setDirty(v !== '' || !!d.filePath)
   })
   let raf = 0
   let lineCount = 1
