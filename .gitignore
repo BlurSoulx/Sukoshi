@@ -10,3 +10,5 @@ vendor/
 # Generados por wails build
 frontend/wailsjs/
 frontend/package.json.md5
+# Plantilla local de trabajo (no versionar)
+plantilla-wails/
