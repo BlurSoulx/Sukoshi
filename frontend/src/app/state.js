@@ -9,7 +9,7 @@ function freshName() {
 }
 
 function makeDoc() {
-  return { id: nextId++, content: '', filePath: '', fileName: '', dirty: false, sel: 0 }
+  return { id: nextId++, content: '', filePath: '', fileName: '', dirty: false, sel: 0, restored: false }
 }
 
 export const state = {
@@ -92,6 +92,9 @@ export function replaceDocs(list, activeIdx = 0) {
     d.fileName = f.fileName || 'untitled.txt'
     d.dirty = !!f.dirty
     d.sel = f.sel || 0
+    // Viene de la sesión anterior: el primer guardado pregunta antes
+    // de sobrescribir (ver doSave). Se limpia al guardar.
+    d.restored = true
     state.docs.push(d)
   }
   // Las untitled restauradas se renumeran (una sola → untitled.txt).

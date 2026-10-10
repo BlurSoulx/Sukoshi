@@ -319,10 +319,26 @@ export function initShortcuts(editor, settings = null) {
   async function doSave() {
     if (isPlayOpen()) return doSavePane()
     const d = activeDoc()
+    // Restaurado de la sesión anterior: el usuario no pidió editarlo, así que
+    // el primer guardado pregunta (sobrescribir o guardar como). Luego, normal.
+    if (d.restored && d.filePath) {
+      const c = await confirmModal({
+        title: d.fileName,
+        message: t('cf.restoredMsg'),
+        buttons: [
+          { label: t('cf.cancel'), value: 'cancel' },
+          { label: t('cf.saveAsNew'), value: 'asnew' },
+          { label: t('cf.saveHere'), value: 'here', primary: true },
+        ],
+      })
+      if (c === 'asnew') return doSaveAs()
+      if (c !== 'here') return
+    }
     const r = await saveFile(editor, d.filePath, d.fileName)
     if (!r) return
     setFilePath(r.filePath || '')
     if (!r.filePath) activeDoc().fileName = r.fileName
+    activeDoc().restored = false
     setDirty(false)
     pushRecent(r.filePath)
     noteSaved(r.filePath)
@@ -334,6 +350,7 @@ export function initShortcuts(editor, settings = null) {
     if (!r) return
     setFilePath(r.filePath || '')
     if (!r.filePath) activeDoc().fileName = r.fileName
+    activeDoc().restored = false
     setDirty(false)
     pushRecent(r.filePath)
     noteSaved(r.filePath)

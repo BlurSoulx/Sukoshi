@@ -40,10 +40,11 @@ export function initWatch(editor) {
   }
 
   // Autoguardado (off por defecto): cada 10s guarda pestañas con ruta y cambios.
+  // Los restaurados de la sesión se saltan hasta su primer guardado manual.
   async function autosave() {
     if (!getSetting('autosave') || !window.go?.main?.App) return
     for (const d of state.docs) {
-      if (!d.filePath || !d.dirty) continue
+      if (!d.filePath || !d.dirty || d.restored) continue
       const content = d === activeDoc() ? editor.getValue() : d.content
       try {
         await window.go.main.App.WriteFile(d.filePath, content)
