@@ -1,5 +1,15 @@
 # Historial de cambios — Sukoshi
 
+## v0.2.0
+
+- [x] "Abrir con" de Windows: clic derecho en cualquier archivo lo abre en pestaña (sin filtro de extensión)
+- [x] Instancia única: un segundo "Abrir con" reutiliza la ventana abierta en vez de duplicar la app
+- [x] Las tabs vírgenes ya no se guardan en la sesión (no resucitan al abrir ni estorban a "Abrir con")
+- [x] Escribir y borrarlo todo en una untitled la deja virgen (limpia el dirty)
+- [x] Las untitled se renumeran al restaurar la sesión (una sola vuelve a ser `untitled.txt`)
+- [x] Descartar al salir limpia de verdad (antes el doc sucio resucitaba y duplicaba al reabrir)
+- [x] Reabrir un archivo ya abierto salta a su pestaña en vez de duplicarla
+
 ## v0.1.0 (primera release portable)
 
 - [x] Frontend Vite + Vanilla JS funcional (`pnpm dev` / `pnpm build` verificados)
