@@ -42,4 +42,5 @@
 - [x] Apertura/guardado vía Wails Go + fallback navegador (para `pnpm dev` sin Wails)
 - [x] Ventana frameless preparada (`#drag` con `--wails-draggable: drag`)
 - [x] Verificado `wails build` → `build/bin/Sukoshi.exe` (Wails v2.16.0, Go 1.27.1)
+- [x] "Abrir con" de Windows: los args del `.exe` se abren en pestañas al arrancar (cualquier extensión)
 - [ ] Probar `wails dev` y uso real del editor

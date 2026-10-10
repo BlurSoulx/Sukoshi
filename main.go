@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -13,7 +14,8 @@ import (
 var assets embed.FS
 
 func main() {
-	app := NewApp()
+	// "Abrir con" de Windows llega como argumentos (el drop va por OnFileDrop).
+	app := NewApp(os.Args[1:])
 
 	err := wails.Run(&options.App{
 		Title:     "Sukoshi",

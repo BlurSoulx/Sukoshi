@@ -40,6 +40,7 @@ package main
 
 import (
 	"embed"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -51,7 +52,8 @@ import (
 var assets embed.FS
 
 func main() {
-	app := NewApp()
+	// "Abrir con" de Windows llega como argumentos (el drop va por OnFileDrop).
+	app := NewApp(os.Args[1:])
 
 	err := wails.Run(&options.App{
 		Title:     "MiApp",
@@ -98,15 +100,33 @@ import (
 
 type App struct {
 	ctx context.Context
+	// Rutas de "Abrir con" (Windows las pasa como args del .exe).
+	pendingFiles []string
 }
 
-func NewApp() *App {
-	return &App{}
+func NewApp(args []string) *App {
+	var pending []string
+	for _, a := range args {
+		if fi, err := os.Stat(a); err == nil && !fi.IsDir() {
+			pending = append(pending, a)
+		}
+	}
+	return &App{pendingFiles: pending}
 }
 
 // Guarda el ctx: TODOS los runtime.*Dialog lo necesitan.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+// El frontend la llama al arrancar para abrir lo de "Abrir con" (una vez).
+func (a *App) ConsumePendingFiles() []string {
+	p := a.pendingFiles
+	a.pendingFiles = nil
+	if p == nil {
+		return []string{}
+	}
+	return p
 }
 
 func (a *App) OpenAndRead() (map[string]string, error) {

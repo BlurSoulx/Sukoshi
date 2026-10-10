@@ -128,7 +128,13 @@ export function initApp() {
   }).catch(() => {
     editor.setValue('')
     setDirty(false)
-  }).then(() => {
+  }).then(async () => {
+    // "Abrir con" (args del .exe): se abren tras la sesión, en pestañas.
+    // Sin filtro de extensión: si el usuario lo abre con Sukoshi, lo abrimos.
+    try {
+      const pending = await window.go?.main?.App?.ConsumePendingFiles()
+      if (pending?.length) await files.openPaths(pending, true)
+    } catch { /* sin backend o rutas inválidas: arranque normal */ }
     textarea.disabled = false
     editor.focus()
   })

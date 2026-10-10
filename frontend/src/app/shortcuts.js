@@ -282,9 +282,9 @@ export function initShortcuts(editor, settings = null) {
     scroller.scrollTop = Math.max(0, (line - 1) * lh - scroller.clientHeight / 2)
   }
 
-  async function doOpenPaths(paths) {
+  async function doOpenPaths(paths, acceptAll = false) {
     const inPlay = document.body.classList.contains('play')
-    const files = paths.filter((x) => /\.(txt|md|markdown|html|css|js)$/i.test(x)).slice(0, 8)
+    const files = paths.filter((x) => acceptAll || /\.(txt|md|markdown|html|css|js)$/i.test(x)).slice(0, 8)
     for (const p of files) {
       if (inPlay) {
         const m = /\.([^.]+)$/.exec(p)

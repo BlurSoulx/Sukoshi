@@ -14,14 +14,33 @@ import (
 
 type App struct {
 	ctx context.Context
+	// Rutas pasadas por línea de comandos ("Abrir con"): se consumen una vez.
+	pendingFiles []string
 }
 
-func NewApp() *App {
-	return &App{}
+func NewApp(args []string) *App {
+	var pending []string
+	for _, a := range args {
+		// Solo archivos existentes (Windows puede pasar flags u otras cosas).
+		if fi, err := os.Stat(a); err == nil && !fi.IsDir() {
+			pending = append(pending, a)
+		}
+	}
+	return &App{pendingFiles: pending}
 }
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+// Devuelve y limpia las rutas de "Abrir con" (una sola vez por arranque).
+func (a *App) ConsumePendingFiles() []string {
+	p := a.pendingFiles
+	a.pendingFiles = nil
+	if p == nil {
+		return []string{}
+	}
+	return p
 }
 
 type OpenResult struct {
