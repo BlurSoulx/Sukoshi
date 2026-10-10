@@ -43,4 +43,5 @@
 - [x] Ventana frameless preparada (`#drag` con `--wails-draggable: drag`)
 - [x] Verificado `wails build` → `build/bin/Sukoshi.exe` (Wails v2.16.0, Go 1.27.1)
 - [x] "Abrir con" de Windows: los args del `.exe` se abren en pestañas al arrancar (cualquier extensión)
+- [x] Instancia única: un segundo "Abrir con" reutiliza la ventana abierta (socket local, sin dependencias) y le pasa los archivos
 - [ ] Probar `wails dev` y uso real del editor

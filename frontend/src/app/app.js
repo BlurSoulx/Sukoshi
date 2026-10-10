@@ -33,6 +33,13 @@ export function initApp() {
   window.runtime?.OnFileDrop?.((x, y, paths) => {
     files.openPaths(paths)
   }, false)
+  // Segundas instancias ("Abrir con" con la app abierta): llegan por evento.
+  // Se engancha antes del ConsumePendingFiles de abajo para no perder ninguno.
+  try {
+    window.runtime?.EventsOn?.('open-files', (paths) => {
+      if (Array.isArray(paths) && paths.length) files.openPaths(paths, true)
+    })
+  } catch { /* runtime sin eventos */ }
   window.addEventListener('dragover', (e) => e.preventDefault())
   window.addEventListener('drop', async (e) => {
     e.preventDefault()

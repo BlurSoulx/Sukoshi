@@ -16,6 +16,10 @@ var assets embed.FS
 func main() {
 	// "Abrir con" de Windows llega como argumentos (el drop va por OnFileDrop).
 	app := NewApp(os.Args[1:])
+	// Una sola instancia: si ya hay otra, le pasamos los archivos y salimos.
+	if !app.ensureSingleInstance(os.Args[1:]) {
+		return
+	}
 
 	err := wails.Run(&options.App{
 		Title:     "Sukoshi",

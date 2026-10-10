@@ -33,10 +33,15 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Devuelve y limpia las rutas de "Abrir con" (una sola vez por arranque).
+// Devuelve y limpia las rutas de "Abrir con" (una sola vez por arranque):
+// args propios + los que hayan llegado de segundas instancias durante el boot.
 func (a *App) ConsumePendingFiles() []string {
-	p := a.pendingFiles
+	remoteMu.Lock()
+	p := append(a.pendingFiles, remoteQueue...)
 	a.pendingFiles = nil
+	remoteQueue = nil
+	frontendReady = true
+	remoteMu.Unlock()
 	if p == nil {
 		return []string{}
 	}
